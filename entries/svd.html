@@ -1,1 +1,370 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>The Singular Value Decomposition Pt. I</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=+Sans+Pro:400,300,500,600,200&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css" />
+  <link href="https://fonts.googleapis.com/css?family=Frank+Ruhl+Libre:400,300,500,600,200" rel="stylesheet" type="text/css" />
+  <link href="https://fonts.googleapis.com/css?family=Lato:400,300,500,600,200" rel="stylesheet" type="text/css" />
+  <style>
 
+    strong {
+        font-weight: 700;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    p a {
+      color: #1e90ff;
+    }
+
+    p a:visited {
+      color: #1e90ff;
+    }
+
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    nav:before {
+        content: "Contents";
+        font-weight: bold;
+        font-size: 14pt;
+        display: text;
+        height: 2px;
+        width: 100%;
+        margin: 10px;
+        text-align: center;
+        color: #616161;
+        opacity: 100%;
+        font-family: 'Lato', sans-serif;
+        font-weight: normal;
+    }
+
+    nav:after {
+        content: "";
+        display: block;
+        height: 2px;
+        width: 100%;
+        background: black;
+        opacity: 50%;
+        text-align: center;
+    }
+
+    nav *{
+      font-family: 'Lato', sans-serif;
+      font-weight: normal;
+      font-size: 13pt;
+    }
+    
+    nav ul li a, nav ul li span{
+        opacity: 75%;
+    }
+
+    body {
+      text-align: adjust;
+      margin: 0 auto;
+      max-width: 45em;
+      font-family: 'Frank Ruhl Libre', serif;
+    }
+    html {
+      line-height: 1.3;
+    }
+    h1 {
+      font-size: 27pt;
+      font-family: 'Lato', sans-serif;
+      font-weight: 300;
+    }
+    h2 {
+      font-size: 20pt;
+      font-weight: 400;
+      font-family: 'Lato', sans-serif;
+    }
+
+    h3 {
+        font-family: 'Lato', sans-serif;
+        font-weight: 500;
+    }
+
+
+    div.csl-entry {
+      clear: both;
+      margin-bottom: 0.2em;
+      font-size: 14pt; 
+      opacity: 85%;
+    }
+    body:after {
+      display: block;
+      text-align: right;
+      font-style: italic;
+      content: "Published on Mon March 21, 2022";
+      opacity: 60%;
+      font-size: 14pt;
+    }
+
+    li[role="doc-endnote"] {
+      font-size: 14pt;
+    }
+
+
+    #TOC li {
+      list-style: none;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title"><p>The Singular Value Decomposition<br />
+Pt. I</p></h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#the-svd-theorem">1. The SVD Theorem</a></li>
+<li><a href="#the-moore-penrose-pseudoinverse">2. The Moore-Penrose Pseudoinverse</a></li>
+<li><a href="#best-lower-rank-approximations">3. Best Lower-Rank Approximations</a></li>
+<li><a href="#least-squares-problems">4. Least Squares Problems</a></li>
+<li><a href="#folding-in">5. Folding-in</a></li>
+</ul>
+</nav>
+<p>This entry will go over the singular value decomposition (SVD). The SVD has many applications, from image compression to topic modeling. It also directly leads to principal component analysis, which is a ubiquitous data-simplification technique.</p>
+<p>I will assume the reader has taken a solid first course in linear algebra covering matrices, eigenvalues and diagonalization, the rank-nullity theorem, inner products and norms, and the Gram-Schmidt process. I do not specify extraneous details such as the size of matrices where they can be inferred.</p>
+<p>For simplicity, only the real case will be handled, but the discussion for the more general complex case is identical after substituting the conjugate transpose for the transpose, Hermitian matrices for symmetric matrices, unitary matrices for orthogonal matrices, and the complex numbers for the real numbers, obviously.</p>
+<h2 id="the-svd-theorem">1. The SVD Theorem</h2>
+<p>Recall that a (necessarily square) matrix <span class="math inline">\(M\)</span> is called <em>symmetric</em> if <span class="math inline">\(M = M^{\intercal}\)</span>, <em>orthogonal</em> if <span class="math inline">\(M^{\intercal} = M^{-1}\)</span>, and <em>diagonal</em> if every entry off the main diagonal is <span class="math inline">\(0\)</span>. A cornerstone result in linear algebra is the spectral theorem, which characterizes symmetric matrices.</p>
+<div class="thm*">
+<p><strong>Theorem</strong> (spectral theorem). <em>Let <span class="math inline">\(X\)</span> be a symmetric matrix. Then the eigenvalues of <span class="math inline">\(X\)</span> are exclusively real and <span class="math inline">\(X\)</span> is furthermore orthogonally diagonalizable, that is there is an orthogonal matrix <span class="math inline">\(O\)</span> and a diagonal matrix <span class="math inline">\(D\)</span> such that <span class="math inline">\(X = O D O^{\intercal}\)</span>.</em></p>
+</div>
+<p>The idea behind the SVD starts from a simple observation based on the spectral theorem. Let <span class="math inline">\(X\)</span> be any real matrix. Then the product <span class="math inline">\(X^{\intercal} X\)</span> is a symmetric matrix and the spectral theorem implies that it is orthogonally diagonalizable. The eigenvalues of <span class="math inline">\(X^{\intercal} X\)</span> are not only all real, but they are also all non-negative. Indeed, for a non-zero vector <span class="math inline">\(v\)</span> and a scalar <span class="math inline">\(\lambda \in \mathbb{R}\)</span> such that <span class="math inline">\(X^{\intercal} X v = \lambda v\)</span>, multiplying both sides by <span class="math inline">\(v^{\intercal}\)</span> gives <span class="math inline">\(\|Xv\|^{2} = \lambda \|v\|^2\)</span> and this implies <span class="math inline">\(\lambda \geq 0\)</span>.</p>
+<div class="def*">
+<p><strong>Definition</strong>. The square roots of the positive eigenvalues of <span class="math inline">\(X^{\intercal} X\)</span> are called the <em>singular values</em> of <span class="math inline">\(X\)</span>.</p>
+</div>
+<p>The number of singular values (counting multiplicity) of <span class="math inline">\(X\)</span> is equal to its rank. This is simply because <span class="math inline">\(X\)</span> and <span class="math inline">\(X^{\intercal} X\)</span> have the same null space and hence rank. To see this, it suffices to argue that if <span class="math inline">\(X^{\intercal} X v = 0\)</span> for some vector <span class="math inline">\(v\)</span>, then <span class="math inline">\(Xv = 0\)</span> (the other direction being trivial). Multiplying the first equality by <span class="math inline">\(v^{\intercal}\)</span>, we obtain <span class="math inline">\(\|Xv\|^{2} = 0\)</span>, which implies that <span class="math inline">\(Xv = 0\)</span>. Letting <span class="math inline">\(r = \mathop{\mathrm{rank}}(X)\)</span>, the singular values of <span class="math inline">\(X\)</span> will be denoted by <span class="math inline">\(\sigma_1, \ldots, \sigma_r\)</span>. By convention, these are listed in non-increasing order.</p>
+<p>The value of the above definition lies in the SVD theorem, which we will prove after enunciating. First, let <span class="math inline">\(\Sigma\)</span> be the matrix of the same size as <span class="math inline">\(X\)</span> with entries <span class="math inline">\(\Sigma_{ij} = \sigma_i\)</span> for <span class="math inline">\(i = j \leq r\)</span> and <span class="math inline">\(\Sigma_{ij} = 0\)</span> otherwise. (Such a matrix is called <em>rectangular-diagonal</em>.)</p>
+<div class="thm*">
+<p><strong>Theorem</strong> (SVD). <em>There exist orthogonal matrices <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> such that <span id="eq:svd1"><span class="math display">\[X  = P \Sigma Q^{\intercal}.\qquad(1)\]</span></span></em></p>
+</div>
+<p>The decomposition of <span class="math inline">\(X\)</span> given by the second form is the titular <em>singular value decomposition</em>. The SVD theorem is in a sense a generalization of the spectral theorem: any matrix, square or rectangular, symmetric or not, can be orthogonally diagonalized. We do give up, however, equality of the matrices <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> (if <span class="math inline">\(X\)</span> is rectangular then they won’t even have the same size).</p>
+<p>An important observation is that the product on the RHS of eq. 1 can be written more parsimoniously. Since the entries of <span class="math inline">\(\Sigma\)</span> past its <span class="math inline">\(r^{\text{th}}\)</span> row or <span class="math inline">\(r^{\text{th}}\)</span> column are all <span class="math inline">\(0\)</span>, the entries of <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> past their <span class="math inline">\(r^{\text{th}}\)</span> columns do not contribute to this product. The upshot is that we can truncate the matrices <span class="math inline">\(P\)</span>, <span class="math inline">\(\Sigma\)</span> and <span class="math inline">\(Q\)</span> and write the SVD instead as<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> <span id="eq:svd2"><span class="math display">\[X  = [P_{ij}]_{j\leq r} [\Sigma_{ij}]_{i, j \leq r} [Q_{ij}]_{j\leq r}^{\intercal},\qquad(2)\]</span></span> provided <span class="math inline">\(r \geq 1\)</span>, obviously (an assumption we will always make from here on). This alternate form of the SVD is the one often given in the statistical learning literature, but I prefer the previous one because it makes the analogy with the spectral theorem clearer.</p>
+<p>Now onto the proof.</p>
+<div class="proof">
+<p><em>Proof.</em> Set <span class="math inline">\(Q\)</span> to be an orthogonal matrix that orthogonally diagonalizes <span class="math inline">\(X^{\intercal} X\)</span> as per the spectral theorem. Denote the first <span class="math inline">\(r\)</span> columns of <span class="math inline">\(Q\)</span> by <span class="math inline">\(q_1, \ldots, q_{r}\)</span>. We can arrange that each <span class="math inline">\(q_i\)</span> is an eigenvector for <span class="math inline">\(\sigma_i^{2}\)</span> (which is an eigenvalue of <span class="math inline">\(X^{\intercal} X\)</span>). Let <span class="math display">\[P&#39; = X [Q_{ij}]_{j\leq r} [\Sigma_{ij}]_{i, j \leq r}^{-1}.\]</span> Note that <span class="math inline">\([\Sigma_{ij}]_{i, j \leq r}^{-1}\)</span> is simply the <span class="math inline">\(r \times r\)</span> diagonal matrix whose <span class="math inline">\(i^{\text{th}}\)</span> diagonal entry is <span class="math inline">\(\sigma_i^{-1}\)</span>. Thus the <span class="math inline">\(i^{\text{th}}\)</span> column of <span class="math inline">\(P&#39;\)</span> is <span class="math inline">\(\sigma_i^{-1}Xq_i\)</span>. Now, we have <span class="math display">\[\begin{align*}
+\langle \sigma_{i}^{-1} Xq_i, \sigma_j^{-1} Xq_j \rangle &amp;= \sigma_i^{-1} \sigma_j^{-1} q_j^{\intercal} X^{\intercal} X q_i \\
+&amp;= \sigma_i \sigma_j^{-1} \langle q_i, q_j \rangle \\
+&amp;= \begin{cases} 1 \text{ if } i = j \\ 0 \text { if } i \neq j \end{cases},
+\end{align*}\]</span> where the last equality follows from the orthonormality of the columns of <span class="math inline">\(Q\)</span>. This means the columns of <span class="math inline">\(P&#39;\)</span> are also orthonormal. Next, complete <span class="math inline">\(P&#39;\)</span> to an orthogonal matrix <span class="math inline">\(P\)</span> so that <span class="math inline">\([P_{ij}]_{j\leq r} = P&#39;\)</span> (this can always be done). Then eq. 2 will be satisfied due to how <span class="math inline">\(P&#39;\)</span> was defined, which completes the proof. ◻</p>
+</div>
+<p>In summary, here is how to find the SVD of <span class="math inline">\(X\)</span>:</p>
+<ol type="1">
+<li><p>Find the eigenvalues of <span class="math inline">\(X^{\intercal} X\)</span>. Their square roots are the singular values of <span class="math inline">\(X\)</span>.</p></li>
+<li><p>Form the rectangular-diagonal matrix <span class="math inline">\(\Sigma\)</span> by arranging the singular values of <span class="math inline">\(X\)</span> on its main diagonal (in non-increasing order).</p></li>
+<li><p><span class="math inline">\(Q\)</span> is an orthogonal matrix such that <span class="math inline">\(Q^{\intercal} X^{\intercal} X Q\)</span> is diagonal (guaranteed to exist by the spectral theorem).</p></li>
+<li><p><span class="math inline">\(P\)</span> is an orthogonal matrix whose <span class="math inline">\(i^{th}\)</span> column is <span class="math inline">\(\sigma_i^{-1} X q_i\)</span>, where <span class="math inline">\(q_i\)</span> is the <span class="math inline">\(i^{\text{th}}\)</span> column of <span class="math inline">\(Q\)</span>.</p></li>
+</ol>
+<h2 id="the-moore-penrose-pseudoinverse">2. The Moore-Penrose Pseudoinverse</h2>
+<p>The matrix <span class="math inline">\(X\)</span> will generally not be invertible, if only because it can be rectangular. However, it is possible to define a more general notion, called the <em>(Moore-Penrose) pseudoinverse</em>, that coincides with the inverse when <span class="math inline">\(X\)</span> is indeed invertible. This is an operation <span class="math inline">\(X \mapsto X^{+}\)</span> with the following defining properties: (a) <span class="math inline">\(X X^{+} X = X\)</span>, (b) <span class="math inline">\((XX^{+})^{\intercal} = XX^{+}\)</span>, and (c) <span class="math inline">\((X^{+})^{+} = X\)</span>. Note that this entails that the size of <span class="math inline">\(X^{+}\)</span> is transpose to that of <span class="math inline">\(X\)</span>.</p>
+<p>Arguing that there can be no more than one pseudoinverse (uniqueness) is a matter of repeatedly applying the above properties, so I will only argue its existence. This is straightforward: For a rectangular-diagonal matrix, its pseudoinverse is obtained by replacing the non-zero diagonal values by their reciprocals and then taking the transpose. For a general matrix <span class="math inline">\(X\)</span> on the other hand, its pseudoinverse is <span id="eq:pseudo"><span class="math display">\[X^{+} = Q \Sigma^{+} P^{\intercal}.\qquad(3)\]</span></span> The above properties are then easily checked.</p>
+<p>This said, if <span class="math inline">\(X^{\intercal} X\)</span> is invertible, it will follow from the orthogonal decomposition <span class="math inline">\(X^{\intercal} X = Q \Sigma^{\intercal} \Sigma Q^{\intercal}\)</span> and eq. 3 that <span id="eq:pseudo_fast"><span class="math display">\[X^{+} = (X^{\intercal} X)^{-1} X^{\intercal},\qquad(4)\]</span></span> which is often more expedient as the SVD doesn’t have to be expressly computed.</p>
+<h2 id="best-lower-rank-approximations">3. Best Lower-Rank Approximations</h2>
+<p>For <span class="math inline">\(1 \leq k \leq r\)</span>, define <span id="eq:svd3"><span class="math display">\[X_{k}  = [P_{ij}]_{j\leq k} [\Sigma_{ij}]_{i, j \leq k} [Q_{ij}]_{j\leq k}^{\intercal}.\qquad(5)\]</span></span> Looking at eq. 2, the matrix <span class="math inline">\(X_{k}\)</span> is the matrix <span class="math inline">\(X\)</span> which has “lost” its last <span class="math inline">\(r - k\)</span> singular values and it has rank <span class="math inline">\(k\)</span>. It is worth pointing out that eq. 5 is ipso facto the SVD of <span class="math inline">\(X_k\)</span> in the form of eq. 2 and its SVD in the form of eq. 1 is (why?) <span id="eq:svd4"><span class="math display">\[X_k = P \Sigma_k Q^{\intercal}.\qquad(6)\]</span></span> A remarkable result is that <span class="math inline">\(X_{k}\)</span> is the best rank <span class="math inline">\(k\)</span> approximation of <span class="math inline">\(X\)</span>, in a sense that will be made precise below. This is the Eckart-Young-Mirsky theorem.</p>
+<p>The norm of a matrix is simply the square root of the sum of the squares of its entries, much like for a vector. (There are several notions of norms on matrices, this is the <em>Frobenius norm</em>.)</p>
+<div class="thm*">
+<p><strong>Theorem</strong> (Eckart-Young-Mirsky). <em>The matrix <span class="math inline">\(X_{k}\)</span> minimizes the quantity <span class="math inline">\(\|X - Y\|\)</span> among all matrices <span class="math inline">\(Y\)</span> of the same size as <span class="math inline">\(X\)</span> and of rank <span class="math inline">\(k\)</span>. Thus <span class="math display">\[\|X - X_{k}\| \leq \|X - Y\|\]</span> for all such matrices <span class="math inline">\(Y\)</span>.</em></p>
+</div>
+<p>From eq. 6, it follows that the quantity <span class="math inline">\(\|X - X_{k}\|\)</span> that appears above is <span class="math inline">\(\sqrt{\sum_{i=k+1}^{r} \sigma_i^{2}}\)</span>. Proving the EYM theorem requires quite a bit of work, so I will avoid doing so in the interest of keeping this entry to a reasonable length. The curious reader can find a proof over at <a href="https://en.wikipedia.org/wiki/Low-rank_approximation#Proof_of_Eckart%E2%80%93Young%E2%80%93Mirsky_theorem_(for_Frobenius_norm)">Wikipedia</a>.</p>
+<h2 id="least-squares-problems">4. Least Squares Problems</h2>
+<p>Consider the problem of finding a vector <span class="math inline">\(w\)</span> that solves <span class="math inline">\(Xw = y\)</span> for some fixed vector <span class="math inline">\(y\)</span>. If this equation is overdetermined, then it might very well not have a solution and we might instead try to minimize the deviation <span class="math inline">\(\|Xw - y\|\)</span>.</p>
+<p>This is, essentially, the problem of linear regression by ordinary least squares (OLS). In that context, the columns of <span class="math inline">\(X\)</span> are the explanatory variables (or <em>predictors</em>), the vector <span class="math inline">\(y\)</span> is the variable to be explained (or <em>response</em>) and the <span class="math inline">\(i^{\text{th}}\)</span> component of <span class="math inline">\(w\)</span> is the weight to be attributed to the <span class="math inline">\(i^{\text{th}}\)</span> explanatory variable.</p>
+<p>Using the SVD, we can rewrite <span class="math display">\[\begin{align*}
+  \|Xw - y\| &amp;= \|P\Sigma Q^{\intercal} w - P P^{\intercal} y\| \\
+                &amp;= \|\Sigma Q^{\intercal} w - P^{\intercal}y\|
+\end{align*}\]</span> where the second equality is a consequence of orthogonal matrices being norm-preserving. Defining <span class="math inline">\(w&#39; = Q^{\intercal} w\)</span> and <span class="math inline">\(y&#39; = P^{\intercal} y\)</span>, the problem is equivalent to finding a <span class="math inline">\(w&#39;\)</span> that minimizes <span class="math inline">\(\|\Sigma w&#39; - y&#39;\|\)</span>. This is quite obviously solved by setting <span class="math inline">\(w&#39;(i) = \sigma_i^{-1} y&#39;(i)\)</span> for <span class="math inline">\(i \leq r\)</span>, with the remaining components of <span class="math inline">\(w&#39;\)</span> chosen arbitrarily; it will be convenient to set them to <span class="math inline">\(0\)</span>. Thus <span class="math display">\[w&#39; = \Sigma^{+} y&#39;,\]</span> which, in terms of <span class="math inline">\(w\)</span> and <span class="math inline">\(y\)</span>, translates to <span class="math display">\[\begin{align*}
+  w &amp;= Q \Sigma^{+} P^{\intercal} y \\
+  &amp;= X^{+} y. 
+\end{align*}\]</span> We can infer from the minimization problem itself that the fitted value <span class="math inline">\(XX^{+} y\)</span> is the orthogonal projection of <span class="math inline">\(y\)</span> onto the column space of <span class="math inline">\(X\)</span>.</p>
+<h2 id="folding-in">5. Folding-in</h2>
+<p>From the preceding, the projection of a vector <span class="math inline">\(v\)</span> onto the column space of <span class="math inline">\(X\)</span> is <span class="math inline">\(XX^{+} v\)</span>. Likewise, the projection of a vector <span class="math inline">\(w\)</span> onto the row space of <span class="math inline">\(X\)</span> is <span class="math inline">\(w X^{+} X\)</span> (why?). Notice that <span class="math display">\[\begin{align*}
+  XX^{+}v &amp;= P \Sigma (\Sigma^{+} P^{\intercal}  v), \\
+  w X^{+}X  &amp;= (w Q \Sigma^{+}) \Sigma Q^{\intercal}.
+\end{align*}\]</span> Thus given matrices <span class="math inline">\(V\)</span> and <span class="math inline">\(W\)</span>, and writing <span class="math inline">\(\widetilde{V} = [\Sigma^{+}_{ij}]_{i \leq r} P^{\intercal} V\)</span> and <span class="math inline">\(\widetilde{W} = W Q [\Sigma_{ij}^{+}]_{j \leq r}\)</span>, we can augment eq. 2 to obtain the decomposition <span class="math display">\[\begin{gathered}
+\left[\begin{array}{c|c}
+X &amp; X X^{+} V \\
+\hline
+W X^{+} X  &amp; W X^{+} V 
+\end{array}\right] = \\[3pt]
+\left[\begin{array}{c}
+[P_{ij}]_{j\leq r} \\
+\hline
+\widetilde{W}
+\end{array}\right]  [\Sigma_{ij}]_{i, j \leq r}
+\left[
+[Q_{ij}]_{j\leq r}^{\intercal} \; \big | \; \widetilde{V} \\
+\right]. \end{gathered}\]</span> In some applications, this is known as “folding-in” the matrices <span class="math inline">\(V\)</span> and <span class="math inline">\(W\)</span>. In that context, <span class="math inline">\(X = A_r\)</span> where <span class="math inline">\(A\)</span> is typically a sparse matrix and <span class="math inline">\(V\)</span> (resp. <span class="math inline">\(W\)</span>) consists of new columns (resp. new rows) to be appended to those of <span class="math inline">\(A\)</span>. As it can be expensive to compute the SVD of <span class="math display">\[A &#39; = \left[\begin{array}{c|c}
+A &amp; V \\
+\hline
+W &amp; \ast
+\end{array}\right],\]</span> folding-in is seen as a compromise allowing us to salvage the (already computed) SVD of <span class="math inline">\(A\)</span>. For all intents and purposes, the RHS of the above decomposition is treated as though it were the SVD of <span class="math inline">\(A&#39;\)</span>.</p>
+<p>To take an example, suppose <span class="math inline">\(A\)</span> is a term-document matrix with the documents along the columns. In the context of latent semantic analysis/indexing, the columns of <span class="math inline">\([P_{ij}]_{j\leq r}\)</span> are interpreted as mutually orthogonal “topics” or “concepts”) determined by their values in each row, and those of <span class="math inline">\([Q_{ij}]_{j\leq r}^{\intercal}\)</span> as the affinities of the documents for the topics<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. The columns of <span class="math inline">\(V\)</span> would then represent new documents to be incorporated. Rather than computing a new SVD, we keep the previous list of topics and interpret the entries of <span class="math inline">\(\widetilde{V}\)</span> as the affinities of the new documents for these. This said, folding-in will lose its effectiveness as documents regarding topics outside that list are added, eventually making the computation of a new SVD preferable.</p>
+<section class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1" role="doc-endnote"><p>Regarding the order of operations on matrices, truncation always comes first in my convention.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2" role="doc-endnote"><p>Negative entries in <span class="math inline">\(P\)</span> (resp. <span class="math inline">\(Q\)</span>) present a difficulty for this interpretation: do they indicate positive, negative or non-existent affinities between topics and terms (resp. documents and topics)? Authors differ on this question. Some choose not to answer it, treating the topics as merely useful mathematical objects.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+</body>
+</html>
