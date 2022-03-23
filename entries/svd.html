@@ -151,10 +151,19 @@
   <link href="https://fonts.googleapis.com/css?family=+Sans+Pro:400,300,500,600,200&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css" />
   <link href="https://fonts.googleapis.com/css?family=Frank+Ruhl+Libre:400,300,500,600,200" rel="stylesheet" type="text/css" />
   <link href="https://fonts.googleapis.com/css?family=Lato:400,300,500,600,200" rel="stylesheet" type="text/css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
 
     strong {
         font-weight: 700;
+    }
+
+    footer a {
+      color: #1e90ff;
+    }
+
+    footer a:visited {
+      color: #1e90ff;
     }
 
     a {
@@ -234,7 +243,6 @@
         font-weight: 500;
     }
 
-
     div.csl-entry {
       clear: both;
       margin-bottom: 0.2em;
@@ -243,10 +251,23 @@
     }
     body:after {
       display: block;
+      text-align: left;
+      font-style: italic;
+      opacity: 100;
+      font-size: 14pt;
+    }
+
+    div.published {
+      display: block;
       text-align: right;
       font-style: italic;
-      content: "Published on Mon March 21, 2022";
       opacity: 60%;
+      font-size: 14pt;
+    }
+
+    div.home {
+      text-align: left;
+      font-style: italic;
       font-size: 14pt;
     }
 
@@ -366,5 +387,15 @@ W &amp; \ast
 <li id="fn2" role="doc-endnote"><p>Negative entries in <span class="math inline">\(P\)</span> (resp. <span class="math inline">\(Q\)</span>) present a difficulty for this interpretation: do they indicate positive, negative or non-existent affinities between topics and terms (resp. documents and topics)? Authors differ on this question. Some choose not to answer it, treating the topics as merely useful mathematical objects.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>
+<footer>
+  <div class="container" style="display: flex; margin-top: 50px">
+      <div class="home" width=50%>
+        <a href="../index.html">Home</a>
+      </div>
+      <div class="published" style="flex-grow: 1; text-align: right">
+      Published on Mon March 21, 2022
+      </div>
+  </div>
+</footer>
 </body>
 </html>
