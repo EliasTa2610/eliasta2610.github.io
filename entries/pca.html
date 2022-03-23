@@ -242,7 +242,6 @@
       margin: 0 auto;
       max-width: 45em;
       font-family: 'Frank Ruhl Libre', serif;
-      padding-top: 10px;
     }
     html {
       line-height: 1.3;
@@ -367,7 +366,7 @@ w&#39;_k &amp;= (X [Q_{ij}]_{j\leq k})^{+} y \\
 <p>In terms of the initial predictors, retaining the first <span class="math inline">\(k\)</span> principal components is akin to using the estimator <span class="math inline">\([Q_{ij}]_{j\leq k} \, w&#39;_k\)</span> for <span class="math inline">\(\widetilde{w}\)</span>. However, unless <span class="math inline">\(X^{\intercal} X\)</span> is invertible and <span class="math inline">\(k = r\)</span>, it will generally not be unbiased, with bias equal to <span class="math display">\[[Q_{ij}]_{j\leq k} [Q_{ij}]_{j\leq k}^{\intercal}\widetilde{w} - \widetilde{w}.\]</span> Conceptually, this is the error incurred on <span class="math inline">\(\widetilde{w}\)</span> by the dimensionality reduction procedure seen in §6. The total variance of this estimator on the other hand is <span class="math display">\[\mu^2 \sum_{i=1}^{k} \sigma_i^{-2}.\]</span> As <span class="math inline">\(k\)</span> decreases so will total variance but, as one might imagine, bias will generally increase. This is an instance of the perennial bias-variance tradeoff. That said, in practice some level of bias is preferable to a large total variance.</p>
 <p>Another boon of using PCR is that the components of <span class="math inline">\([Q_{ij}]_{j\leq k} \, w&#39;_k\)</span> will in general not vanish, meaning all the initial predictors are involved even when <span class="math inline">\(X^{\intercal} X\)</span> is not invertible. This is often better for explainability.</p>
 <h2 id="further-reading">9. Further Reading</h2>
-<p>The book <span class="citation" data-cites="pca">[4]</span> offers a comprehensive coverage of PCA, addressing a mix of theoretical and practical questions,</p>
+<p>The book <span class="citation" data-cites="pca">[4]</span> offers a comprehensive coverage of PCA, addressing a mix of theoretical and practical questions.</p>
 <p>For more theoretical results on the SVD, <span class="citation" data-cites="matrix">[3]</span> is good reference.</p>
 <p>The book <span class="citation" data-cites="manning">[5]</span> and the primary sources <span class="citation" data-cites="berry index">[1, 2]</span> discuss the SVD in the context of latent semantic analysis/indexing. The reference <span class="citation" data-cites="berry">[1]</span> furthermore contains expressions for the time complexities of computing the SVD, updating the SVD, and folding-in.</p>
 <p>See <span class="citation" data-cites="rec rec2">[6, 7]</span> for the use of the SVD in collaborative filtering in the context of recommender systems.</p>
