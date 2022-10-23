@@ -381,7 +381,7 @@ Q \textnormal{diag}(\tfrac{\sigma_1^{2}}{\sigma_1^{2} + \lambda}, \ldots, \tfrac
 \mu^{2} Q (\Sigma^{\intercal} \Sigma + \lambda I)^{-1} \Sigma^{\intercal} \Sigma  (\Sigma^{\intercal} \Sigma + \lambda I)^{-1} Q^{\intercal} = \\\
 \mu^{2} Q \textnormal{diag}(\tfrac{\sigma_1^{2}}{(\sigma_1^{2} + \lambda)^{2}}, \ldots, \tfrac{\sigma_r^{2}}{(\sigma_r^{2} + \lambda)^{2}}, 0, \ldots, 0) Q^{\intercal},\end{gathered}\]</span> giving the total variance <span class="math display">\[\mu^{2} \sum_{i\leq r} \frac{\sigma_{i}^2}{(\sigma_i^{2} + \lambda)^{2}}.\]</span> These expressions converge towards their counterparts for the OLS estimator when <span class="math inline">\(\lambda \to 0\)</span>, which tracks with the augmented objective function reverting to the original in that limit.</p>
 <p>The total variance of the ridge estimator is strictly smaller than that of the OLS estimator, scaling the summand <span class="math inline">\(\sigma_i^{-2}\)</span> by a factor of <span class="math display">\[\frac{\sigma_i^{4}}{(\sigma_i^{2} + \lambda)^{2}} = \frac{1}{1   + {2\lambda} {\sigma_i^{-2}} + \lambda^{2}{\sigma_i^{-4}}},\]</span> thus attenuating <span class="math inline">\(\sigma_i^{-2}\)</span> more severely for higher values of <span class="math inline">\(i\)</span>.</p>
-<p>We could therefore say that whereas PCR interpolates between the trivial estimator and the OLS estimator in steps, ridge regression does so continuously. Though PCR can cut down total variance more dramatically, ridge regression provides better guarantees on its bias: when <span class="math inline">\(X^T X\)</span> is invertible, the normed bias is bounded by <span class="math display">\[\|\textnormal{diag}(\tfrac{\lambda}{\sigma_1^{2} + \lambda}, \ldots, \tfrac{\lambda}{\sigma_1^{2} + \lambda})\| \! \cdot \! \|w\|.\]</span> In practice, ridge regression usually outperforms PCR, if only because the former represents an infinite family of estimators while the latter only a finite one.</p>
+<p>We could therefore say that whereas PCR interpolates between the trivial estimator and the OLS estimator in steps, ridge regression does so continuously. Though PCR can cut down total variance more dramatically, ridge regression provides better guarantees on its bias: when <span class="math inline">\(X^{\intercal} X\)</span> is invertible, the normed bias is bounded by <span class="math display">\[\|\textnormal{diag}(\tfrac{\lambda}{\sigma_1^{2} + \lambda}, \ldots, \tfrac{\lambda}{\sigma_1^{2} + \lambda})\| \! \cdot \! \|w\|.\]</span> In practice, ridge regression usually outperforms PCR, if only because the former represents an infinite family of estimators while the latter only a finite one.</p>
 <h2 id="further-reading">11. Further Reading</h2>
 <p>The book <span class="citation" data-cites="pca">[4]</span> offers a comprehensive coverage of PCA, addressing a mix of theoretical and practical questions.</p>
 <p>For more theoretical results on the SVD, <span class="citation" data-cites="matrix">[3]</span> is good reference.</p>
@@ -421,8 +421,8 @@ Q \textnormal{diag}(\tfrac{\sigma_1^{2}}{\sigma_1^{2} + \lambda}, \ldots, \tfrac
         <a href="../index.html">Home</a>
       </div>
       <div class="published" style="flex-grow: 1; text-align: right">
-      Published on Mon March 21, 2022 <br>
-      Expanded on Sun Oct 23, 2022
+          Published on Mon March 21, 2022 <br>
+          Expanded on Sun Oct 23, 2022
       </div>
   </div>
 </footer>
