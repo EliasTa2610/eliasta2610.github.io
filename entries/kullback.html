@@ -458,31 +458,41 @@ P(A) &amp;= \int_{A} \tfrac{dP}{dQ} \, dQ \\
             &amp;\phantom{=} \int D_{KL}(P^{x} \parallel Q^{x}) \, P_1(dx),\end{aligned}\]</span> where the penultimate inequality follows from iii. and LOTUS. ◻</p>
 </div>
 <h2 id="further-reading">5. Further Reading</h2>
-<p>In the standard Borel space setting, there are considerable results regarding the minimization of the KL divergence with respect to its first argument. Indeed, <span class="math inline">\(\mathcal{M}(\mathcal{X})\)</span> equipped with the topology of weak convergence is well-behaved and the sublevel sets of the KL divergence are compact. Together with lower semicontinuity, this implies that a minimizer of <span class="math inline">\(D_{KL}(\cdot \parallel Q)\)</span> exists when the first argument is restricted to a closed family <span class="math inline">\(\mathcal{P}\)</span> with at least one member <span class="math inline">\(P \in \mathcal{P}\)</span> with <span class="math inline">\(D_{KL}(P \parallel Q) &lt; \infty\)</span>. When <span class="math inline">\(\mathcal{P}\)</span> is in addition convex and closed in the <a href="https://en.wikipedia.org/wiki/Total_variation_distance_of_probability_measures">total variation topology</a> (which is finer), there is a unique minimizer. This is explained in <span class="citation" data-cites="pinkski">[6]</span> and its references <span class="citation" data-cites="dupuis">[5]</span> and <span class="citation" data-cites="csiszar">[3]</span>.</p>
-<p>The book <span class="citation" data-cites="boucheron">[2]</span> and the manuscript <span class="citation" data-cites="poly_wu">[7]</span> rigorously address the KL divergence in the context of information theory, adopting the variational viewpoint presented in §3. This viewpoint is also common in the large deviations literature, I found the standard reference <span class="citation" data-cites="dembo">[4]</span> particularly useful.</p>
-<p>Of course, the KL divergence has various interesting applications in ML. A starting point would be the classic reference <span class="citation" data-cites="bishop">[1]</span>. Some of those applications will be presented in a subsequent blog entry.</p>
+<p>In the standard Borel space setting, there are considerable results regarding the minimization of the KL divergence with respect to its first argument. Indeed, <span class="math inline">\(\mathcal{M}(\mathcal{X})\)</span> equipped with the topology of weak convergence is well-behaved and the sublevel sets of the KL divergence are compact. Together with lower semicontinuity, this implies that a minimizer of <span class="math inline">\(D_{KL}(\cdot \parallel Q)\)</span> exists when the first argument is restricted to a closed family <span class="math inline">\(\mathcal{P}\)</span> with at least one member <span class="math inline">\(P \in \mathcal{P}\)</span> with <span class="math inline">\(D_{KL}(P \parallel Q) &lt; \infty\)</span>. When <span class="math inline">\(\mathcal{P}\)</span> is in addition convex and closed in the <a href="https://en.wikipedia.org/wiki/Total_variation_distance_of_probability_measures">total variation topology</a> (which is finer), there is a unique minimizer. This is explained in <span class="citation" data-cites="pinkski">[7]</span> and its references <span class="citation" data-cites="dupuis">[6]</span> and <span class="citation" data-cites="csiszar">[4]</span>.</p>
+<p>The notes <span class="citation" data-cites="boucheron">[3]</span> and the manuscript <span class="citation" data-cites="poly_wu">[8]</span> rigorously address the KL divergence in the context of information theory, adopting the variational viewpoint presented in §3. This viewpoint is also common in the large deviations literature, I found the standard reference <span class="citation" data-cites="dembo">[5]</span> particularly useful.</p>
+<p>Fundamental results on measure and probability theory found in the notes <span class="citation" data-cites="gaans_1 gaans_2">[9, 10]</span> and the book <span class="citation" data-cites="stoch">[1]</span> were referenced in this entry. The curious reader might find more interesting results there.</p>
+<p>Of course, the KL divergence has various interesting applications in ML. A starting point would be the classic reference <span class="citation" data-cites="bishop">[2]</span>. Some of those applications will be presented in a subsequent blog entry.</p>
 <h2 class="unnumbered" id="references">References</h2>
 <div id="refs" class="references csl-bib-body" role="doc-bibliography">
+<div id="ref-stoch" class="csl-entry" role="doc-biblioentry">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline">Bertsekas, D.P. 1996. <em>Stochastic optimal control</em>. <a href="https://dspace.mit.edu/handle/1721.1/4852" class="uri">https://dspace.mit.edu/handle/1721.1/4852</a>; Athena Scientific.</div>
+</div>
 <div id="ref-bishop" class="csl-entry" role="doc-biblioentry">
-<div class="csl-left-margin">[1] </div><div class="csl-right-inline">Bishop, C.M. 2006. <em>Pattern recognition and machine learning</em>. Springer.</div>
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">Bishop, C.M. 2006. <em>Pattern recognition and machine learning</em>. Springer.</div>
 </div>
 <div id="ref-boucheron" class="csl-entry" role="doc-biblioentry">
-<div class="csl-left-margin">[2] </div><div class="csl-right-inline">Boucheron, S. et al. 2016. <em>Concentration inequalities</em>. Oxford University Press.</div>
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">Boucheron, S. et al. Concentration inequalities. <a href="https://www.hse.ru/data/2016/11/24/1113029206/Concentration%20inequalities.pdf" class="uri">https://www.hse.ru/data/2016/11/24/1113029206/Concentration%20inequalities.pdf</a>.</div>
 </div>
 <div id="ref-csiszar" class="csl-entry" role="doc-biblioentry">
-<div class="csl-left-margin">[3] </div><div class="csl-right-inline">Csiszar, I. 1975. <span class="nocase"><span class="math inline">\(I\)</span>-Divergence Geometry of Probability Distributions and Minimization Problems</span>. <em>The Annals of Probability</em>. 3, 1 (1975), 146–158. DOI:https://doi.org/<a href="https://doi.org/10.1214/aop/1176996454">10.1214/aop/1176996454</a>.</div>
+<div class="csl-left-margin">[4] </div><div class="csl-right-inline">Csiszar, I. 1975. <span class="nocase"><span class="math inline">\(I\)</span>-Divergence Geometry of Probability Distributions and Minimization Problems</span>. <em>The Annals of Probability</em>. 3, 1 (1975), 146–158. DOI:https://doi.org/<a href="https://doi.org/10.1214/aop/1176996454">10.1214/aop/1176996454</a>.</div>
 </div>
 <div id="ref-dembo" class="csl-entry" role="doc-biblioentry">
-<div class="csl-left-margin">[4] </div><div class="csl-right-inline">Dembo, A. and Zeitouni, O. 2009. <em>Large deviations techniques and applications</em>. Springer.</div>
+<div class="csl-left-margin">[5] </div><div class="csl-right-inline">Dembo, A. and Zeitouni, O. 2009. <em>Large deviations techniques and applications</em>. Springer.</div>
 </div>
 <div id="ref-dupuis" class="csl-entry" role="doc-biblioentry">
-<div class="csl-left-margin">[5] </div><div class="csl-right-inline">Dupuis, P. and Ellis, R.S. 1997. <em>A weak convergence approach to the theory of large deviations</em>. John Wiley &amp; Sons.</div>
+<div class="csl-left-margin">[6] </div><div class="csl-right-inline">Dupuis, P. and Ellis, R.S. 1997. <em>A weak convergence approach to the theory of large deviations</em>. John Wiley &amp; Sons.</div>
 </div>
 <div id="ref-pinkski" class="csl-entry" role="doc-biblioentry">
-<div class="csl-left-margin">[6] </div><div class="csl-right-inline">Pinski, F.J. et al. 2015. Kullback–leibler approximation for probability measures on infinite dimensional spaces. <em>SIAM Journal on Mathematical Analysis</em>. 47, 6 (2015), 4091–4122. DOI:https://doi.org/<a href="https://doi.org/10.1137/140962802">10.1137/140962802</a>.</div>
+<div class="csl-left-margin">[7] </div><div class="csl-right-inline">Pinski, F.J. et al. 2015. Kullback–leibler approximation for probability measures on infinite dimensional spaces. <em>SIAM Journal on Mathematical Analysis</em>. 47, 6 (2015), 4091–4122. DOI:https://doi.org/<a href="https://doi.org/10.1137/140962802">10.1137/140962802</a>.</div>
 </div>
 <div id="ref-poly_wu" class="csl-entry" role="doc-biblioentry">
-<div class="csl-left-margin">[7] </div><div class="csl-right-inline">Polyanskiy, Y. and Wu, Y. 2022. <em>Information theory: From coding to learning</em>. Cambridge University Press.</div>
+<div class="csl-left-margin">[8] </div><div class="csl-right-inline">Polyanskiy, Y. and Wu, Y. 2022. <em>Information theory: From coding to learning</em>. <a href="https://people.lids.mit.edu/yp/homepage/data/itbook-export.pdf" class="uri">https://people.lids.mit.edu/yp/homepage/data/itbook-export.pdf</a>; Cambridge University Press.</div>
+</div>
+<div id="ref-gaans_2" class="csl-entry" role="doc-biblioentry">
+<div class="csl-left-margin">[9] </div><div class="csl-right-inline">van Gaans, O. Gradient flows in measure spaces. <a href="https://www.math.leidenuniv.nl/%7Evangaans/TA2011-gradient-mei11.pdf" class="uri">https://www.math.leidenuniv.nl/%7Evangaans/TA2011-gradient-mei11.pdf</a>.</div>
+</div>
+<div id="ref-gaans_1" class="csl-entry" role="doc-biblioentry">
+<div class="csl-left-margin">[10] </div><div class="csl-right-inline">van Gaans, O. Probability measures on metric spaces. <a href="https://www.mat.unb.br/cioletti/itmg-02-2012/pdfs/Probability%20measures%20on%20metric%20spaces%20-%20Onno%20van%20Gaans.pdf" class="uri">https://www.mat.unb.br/cioletti/itmg-02-2012/pdfs/Probability%20measures%20on%20metric%20spaces%20-%20Onno%20van%20Gaans.pdf</a>.</div>
 </div>
 </div>
 <section class="footnotes footnotes-end-of-document" role="doc-endnotes">
