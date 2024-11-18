@@ -7,9 +7,6 @@
   <title>The Kullback-Leibler Divergence: Theory</title>
   <style>
     html {
-      line-height: 1.5;
-      font-family: Georgia, serif;
-      font-size: 20px;
       color: #1a1a1a;
       background-color: #fdfdfd;
     }
@@ -28,10 +25,16 @@
     @media (max-width: 600px) {
       body {
         font-size: 0.9em;
-        padding: 1em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
       }
     }
     @media print {
+      html {
+        background-color: white;
+      }
       body {
         background-color: transparent;
         color: black;
@@ -55,6 +58,10 @@
       color: #1a1a1a;
     }
     img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
       max-width: 100%;
     }
     h1, h2, h3, h4, h5, h6 {
@@ -81,9 +88,10 @@
       color: #606060;
     }
     code {
-      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
       font-size: 85%;
       margin: 0;
+      hyphens: manual;
     }
     pre {
       margin: 1em 0;
@@ -134,20 +142,36 @@
     #TOC li {
       list-style: none;
     }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
     #TOC a:not(:hover) {
       text-decoration: none;
     }
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
-    span.underline{text-decoration: underline;}
-    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for citations */
     div.csl-bib-body { }
     div.csl-entry {
       clear: both;
+      margin-bottom: 0em;
     }
-    .hanging div.csl-entry {
+    .hanging-indent div.csl-entry {
       margin-left:2em;
       text-indent:-2em;
     }
@@ -161,12 +185,7 @@
     }
     div.csl-indent {
       margin-left: 2em;
-    }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
+    }  </style>
   <link href="https://fonts.googleapis.com/css?family=+Sans+Pro:400,300,500,600,200&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css" />
   <link href="https://fonts.googleapis.com/css?family=Frank+Ruhl+Libre:400,300,500,600,200" rel="stylesheet" type="text/css" />
   <link href="https://fonts.googleapis.com/css?family=Lato:400,300,500,600,200" rel="stylesheet" type="text/css" />
@@ -312,6 +331,10 @@
   <!--[if lt IE 9]>
     <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
   <![endif]-->
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+  type="text/javascript"></script>
 </head>
 <body>
 <header id="title-block-header">
@@ -320,190 +343,736 @@ Theory</p></h1>
 </header>
 <nav id="TOC" role="doc-toc">
 <ul>
-<li><a href="#definition-and-first-observations">1. Definition and First Observations</a></li>
-<li><a href="#statistical-testing-and-maximum-likelihood-estimation">2. Statistical Testing and Maximum Likelihood Estimation</a></li>
-<li><a href="#variational-representation">3. Variational Representation</a></li>
-<li><a href="#chain-rule">4. Chain Rule</a></li>
-<li><a href="#further-reading">5. Further Reading</a></li>
-<li><a href="#references">References</a></li>
+<li><a href="#definition-and-first-observations"
+id="toc-definition-and-first-observations">1. Definition and First
+Observations</a></li>
+<li><a href="#statistical-testing-and-maximum-likelihood-estimation"
+id="toc-statistical-testing-and-maximum-likelihood-estimation">2.
+Statistical Testing and Maximum Likelihood Estimation</a></li>
+<li><a href="#variational-representation"
+id="toc-variational-representation">3. Variational
+Representation</a></li>
+<li><a href="#chain-rule" id="toc-chain-rule">4. Chain Rule</a></li>
+<li><a href="#further-reading" id="toc-further-reading">5. Further
+Reading</a></li>
+<li><a href="#references" id="toc-references">References</a></li>
 </ul>
 </nav>
-<p>This entry records some basic mathematical definitions and results revolving around the <em>Kullback-Leibler divergence</em> (KL divergence for short), or the <em>Boltzmann-Shannon relative entropy</em> as it is sometimes known. This notion makes important appearances in many subdisciplines of probability and statistics, such as estimation, information theory, large deviations, game theory, and machine learning (ML), to only name those of which I am aware. A blog entry on a concept with such far-flung applications can only ever be cursory, trammelled as it is by the acceptable length it can take and, naturally, my limited ken.</p>
-<p>I had initially planned to only cover some applications of the KL divergence to ML. However, I found myself frustrated by the confusion I sometimes saw in online discussions, and even academic papers, on what pertinent mathematical statements hold exactly, and how to go about proving them in satisfactory generality. I therefore decided to write a dedicated entry to rigorously work out the results I need to know as a practitioner of ML. A future entry will delve into said applications. Though this kind of piecemeal approach is not in keeping with the nature of this blog, here I thought it better to make an exception.</p>
-<p>The entry is written for a reader familiar with measure theory and measure-theoretic probability, knowing standard results such as the monotone convergence theorem (MCT), the dominated convergence theorem (DCT), the law of the unconscious statistician (LOTUS) and notions such as absolute continuity between measures (symbol <span class="math inline">\(\ll\)</span>) and the Radon-Nykodym (R-N) derivative. As is standard practice, I confound entities equal almost surely (a.s.) under an appropriate background probability measure. I furthermore do not care to distinguish between countable and uncountable probability spaces, writing sums here and integrals there as some authors do, preferring to only write integrals. It is worth stressing once more that my exposition is by no means exhaustive and is purely meant as a mathematically-solid springboard for applications of the KL divergence to ML.</p>
-<h2 id="definition-and-first-observations">1. Definition and First Observations</h2>
+<p>This entry records some basic mathematical definitions and results
+revolving around the <em>Kullback-Leibler divergence</em> (KL divergence
+for short), or the <em>Boltzmann-Shannon relative entropy</em> as it is
+sometimes known. This notion makes important appearances in many
+subdisciplines of probability and statistics, such as estimation,
+information theory, large deviations, game theory, and machine learning
+(ML), to only name those of which I am aware. A blog entry on a concept
+with such far-flung applications can only ever be cursory, trammelled as
+it is by the acceptable length it can take and, naturally, my limited
+ken.</p>
+<p>I had initially planned to only cover some applications of the KL
+divergence to ML. However, I found myself frustrated by the confusion I
+sometimes saw in online discussions, and even academic papers, on what
+pertinent mathematical statements hold exactly, and how to go about
+proving them in satisfactory generality. I therefore decided to write a
+dedicated entry to rigorously work out the results I need to know as a
+practitioner of ML. A future entry will delve into said applications.
+Though this kind of piecemeal approach is not in keeping with the nature
+of this blog, here I thought it better to make an exception.</p>
+<p>The entry is written for a reader familiar with measure theory and
+measure-theoretic probability, knowing standard results such as the
+monotone convergence theorem (MCT), the dominated convergence theorem
+(DCT), the law of the unconscious statistician (LOTUS) and notions such
+as absolute continuity between measures (symbol <span
+class="math inline">\(\ll\)</span>) and the Radon-Nykodym (R-N)
+derivative. As is standard practice, I confound entities equal almost
+surely (a.s.) under an appropriate background probability measure. I
+furthermore do not care to distinguish between countable and uncountable
+probability spaces, writing sums here and integrals there as some
+authors do, preferring to only write integrals. It is worth stressing
+once more that my exposition is by no means exhaustive and is purely
+meant as a mathematically-solid springboard for applications of the KL
+divergence to ML.</p>
+<h2 id="definition-and-first-observations">1. Definition and First
+Observations</h2>
 <p>First we give the definition of the KL divergence.</p>
 <div class="def*">
-<p><strong>Definition</strong>. Let <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> be two probability measures on the same measurable space. Define the <em>Kullback-Leibler divergence</em> between <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> as <span class="math display">\[D_{KL}(P \parallel Q) = 
+<p><strong>Definition</strong>. Let <span
+class="math inline">\(P\)</span> and <span
+class="math inline">\(Q\)</span> be two probability measures on the same
+measurable space. Define the <em>Kullback-Leibler divergence</em>
+between <span class="math inline">\(P\)</span> and <span
+class="math inline">\(Q\)</span> as <span
+class="math display">\[D_{KL}(P \parallel Q) =
 \begin{cases}
   E_{P}[\log(\tfrac{dP}{dQ})] \text{ if } P \ll Q \\
   \infty \text{ otherwise}
 \end{cases}.\]</span></p>
 </div>
-<p>Some remarks are in order. In the case <span class="math inline">\(P \ll Q\)</span>, the value of the function <span class="math inline">\(\log(\tfrac{dP}{dQ})\)</span> is to be taken as <span class="math inline">\(0\)</span> or <span class="math inline">\(\infty\)</span> wherever <span class="math inline">\(\tfrac{dP}{dQ}\)</span> is equal to <span class="math inline">\(0\)</span> or <span class="math inline">\(\infty\)</span>, respectively. The KL divergence is then always defined. Indeed, <span class="math inline">\(E_{P}[\log(\tfrac{dP}{dQ})]\)</span> is defined iff <span class="math inline">\(E_{Q}[\tfrac{dP}{dQ} \log(\tfrac{dP}{dQ})]\)</span> is defined (to which it is then equal). For the latter to be defined, it suffices to show that that <span class="math display">\[E_{Q}[\tfrac{dP}{dQ} \log(\tfrac{dP}{dQ}) \mathbb{1}_{\{{dP}/{dQ} &lt; 1\}}] &gt; -\infty.\]</span> (Why?) As the function <span class="math inline">\(x \to x \log(x)\)</span>, continuously extended at <span class="math inline">\(x = 0\)</span>, is bounded below by <span class="math inline">\(-e^{-1}\)</span>, the inequality above does in fact hold.</p>
-<p>Another important observation is that if <span class="math inline">\(D_{KL}(P \parallel Q) &lt; \infty\)</span>, the convexity of <span class="math inline">\(x \mapsto x \log(x)\)</span> leads to <span class="math display">\[\begin{align*}
-  E_{P}[\log(\tfrac{dP}{dQ})] &amp;= E_{Q}[\tfrac{dP}{dQ} \log(\tfrac{dP}{dQ})] \\
-                              &amp;\geq E_{Q}[\tfrac{dP}{dQ}] \log(E_{Q}[\tfrac{dP}{dQ}]) \\
+<p>Some remarks are in order. In the case <span class="math inline">\(P
+\ll Q\)</span>, the value of the function <span
+class="math inline">\(\log(\tfrac{dP}{dQ})\)</span> is to be taken as
+<span class="math inline">\(0\)</span> or <span
+class="math inline">\(\infty\)</span> wherever <span
+class="math inline">\(\tfrac{dP}{dQ}\)</span> is equal to <span
+class="math inline">\(0\)</span> or <span
+class="math inline">\(\infty\)</span>, respectively. The KL divergence
+is then always defined. Indeed, <span
+class="math inline">\(E_{P}[\log(\tfrac{dP}{dQ})]\)</span> is defined
+iff <span class="math inline">\(E_{Q}[\tfrac{dP}{dQ}
+\log(\tfrac{dP}{dQ})]\)</span> is defined (to which it is then equal).
+For the latter to be defined, it suffices to show that that <span
+class="math display">\[E_{Q}[\tfrac{dP}{dQ} \log(\tfrac{dP}{dQ})
+\mathbb{1}_{\{{dP}/{dQ} &lt; 1\}}] &gt; -\infty.\]</span> (Why?) As the
+function <span class="math inline">\(x \to x \log(x)\)</span>,
+continuously extended at <span class="math inline">\(x = 0\)</span>, is
+bounded below by <span class="math inline">\(-e^{-1}\)</span>, the
+inequality above does in fact hold.</p>
+<p>Another important observation is that if <span
+class="math inline">\(D_{KL}(P \parallel Q) &lt; \infty\)</span>, the
+convexity of <span class="math inline">\(x \mapsto x \log(x)\)</span>
+leads to <span class="math display">\[\begin{align*}
+  E_{P}[\log(\tfrac{dP}{dQ})] &amp;= E_{Q}[\tfrac{dP}{dQ}
+\log(\tfrac{dP}{dQ})] \\
+                              &amp;\geq E_{Q}[\tfrac{dP}{dQ}]
+\log(E_{Q}[\tfrac{dP}{dQ}]) \\
                               &amp;= 0
-  \end{align*}\]</span> by Jensen’s inequality. Thus the KL divergence is never negative, and is equal to <span class="math inline">\(0\)</span> precisely when <span class="math inline">\(P = Q\)</span>.</p>
-<p>Finally, note that the KL divergence is <em>not</em> symmetric. In fact it is easy to find examples where <span class="math inline">\(D_{KL}(P \parallel Q) = \infty\)</span> but <span class="math inline">\(D_{KL}(Q \parallel P) &lt; \infty\)</span>. Thus the KL divergence <span class="math inline">\(D_{KL}(P \parallel Q)\)</span> is better thought of as quantifying the departure of a candidate measure <span class="math inline">\(Q\)</span> from a reference measure <span class="math inline">\(P\)</span>. (The choice of reference and candidate will be justified in the next section.)</p>
-<h2 id="statistical-testing-and-maximum-likelihood-estimation">2. Statistical Testing and Maximum Likelihood Estimation</h2>
-<p>Consider a statistical experiment <span class="math inline">\(X: \Omega \to \mathcal{X}\)</span>. The space <span class="math inline">\(\Omega\)</span> is a probability space, the <em>population space</em>, and we presume that we observe elements of the probability space <span class="math inline">\(\mathcal{X}\)</span>, the <em>sample space</em>, determined by the sampling process <span class="math inline">\(X\)</span> (which is measurable w.r.t. the underlying sigma algebras). Denote by <span class="math inline">\(Q\)</span> the pushforward by <span class="math inline">\(X\)</span> of the probability measure underlying <span class="math inline">\(\Omega\)</span>.</p>
-<p>Generally we do not know <span class="math inline">\(Q\)</span>. Suppose <span class="math inline">\(P_0\)</span> and <span class="math inline">\(P_1\)</span> are two candidates as to its identity. In statistical testing, we try to find a region, or <em>test</em>, <span class="math inline">\(T \subseteq \mathcal{X}\)</span> for the following purpose: given an observation <span class="math inline">\(x = X(\omega), \, \omega \in \Omega\)</span>, we choose <span class="math inline">\(P_0\)</span> if <span class="math inline">\(x \notin T\)</span> and choose <span class="math inline">\(P_1\)</span> otherwise. We call <span class="math inline">\(P_0\)</span> and <span class="math inline">\(P_1\)</span> the <em>null</em> and <em>alternative hypothesis</em>, respectively. In what follows, we assume that any one of <span class="math inline">\(P_0\)</span>, <span class="math inline">\(P_1\)</span> or <span class="math inline">\(Q\)</span> is absolutely continuous w.r.t. the other two.</p>
-<p>The <em>level</em> of the test <span class="math inline">\(T\)</span> is its probability under the null hypothesis, <span class="math inline">\(E_{P_0}[\mathbb{1}_{T}]\)</span>. The <em>power</em> of <span class="math inline">\(T\)</span> on the other hand is its probability under the alternative, <span class="math inline">\(E_{P_1}[\mathbb{1}_{T}]\)</span>. For a given level, we generally want to find a test as powerful as possible. The Neyman-Pearson lemma deals with such tests.</p>
+  \end{align*}\]</span> by Jensen’s inequality. Thus the KL divergence
+is never negative, and is equal to <span
+class="math inline">\(0\)</span> precisely when <span
+class="math inline">\(P = Q\)</span>.</p>
+<p>Finally, note that the KL divergence is <em>not</em> symmetric. In
+fact it is easy to find examples where <span
+class="math inline">\(D_{KL}(P \parallel Q) = \infty\)</span> but <span
+class="math inline">\(D_{KL}(Q \parallel P) &lt; \infty\)</span>. Thus
+the KL divergence <span class="math inline">\(D_{KL}(P \parallel
+Q)\)</span> is better thought of as quantifying the departure of a
+candidate measure <span class="math inline">\(Q\)</span> from a
+reference measure <span class="math inline">\(P\)</span>. (The choice of
+reference and candidate will be justified in the next section.)</p>
+<h2 id="statistical-testing-and-maximum-likelihood-estimation">2.
+Statistical Testing and Maximum Likelihood Estimation</h2>
+<p>Consider a statistical experiment <span class="math inline">\(X:
+\Omega \to \mathcal{X}\)</span>. The space <span
+class="math inline">\(\Omega\)</span> is a probability space, the
+<em>population space</em>, and we presume that we observe elements of
+the probability space <span class="math inline">\(\mathcal{X}\)</span>,
+the <em>sample space</em>, determined by the sampling process <span
+class="math inline">\(X\)</span> (which is measurable w.r.t. the
+underlying sigma algebras). Denote by <span
+class="math inline">\(P\)</span> the pushforward by <span
+class="math inline">\(X\)</span> of the probability measure underlying
+<span class="math inline">\(\Omega\)</span>.</p>
+<p>Generally we do not know <span class="math inline">\(P\)</span>.
+Suppose <span class="math inline">\(Q\)</span> and <span
+class="math inline">\(R\)</span> are two candidates as to its identity.
+In statistical testing, we try to find a region, or <em>test</em>, <span
+class="math inline">\(T \subseteq \mathcal{X}\)</span> for the following
+purpose: given an observation <span class="math inline">\(x = X(\omega),
+\, \omega \in \Omega\)</span>, we choose <span
+class="math inline">\(Q\)</span> if <span class="math inline">\(x \notin
+T\)</span> and choose <span class="math inline">\(R\)</span> otherwise.
+We call <span class="math inline">\(Q\)</span> and <span
+class="math inline">\(R\)</span> the <em>null</em> and <em>alternative
+hypothesis</em>, respectively. In what follows, we assume that any one
+of <span class="math inline">\(Q\)</span>, <span
+class="math inline">\(R\)</span> or <span
+class="math inline">\(P\)</span> is absolutely continuous w.r.t. the
+other two.</p>
+<p>The <em>level</em> of the test <span class="math inline">\(T\)</span>
+is its probability under the null hypothesis, <span
+class="math inline">\(E_{Q}[\mathbb{1}_{T}]\)</span>. The <em>power</em>
+of <span class="math inline">\(T\)</span> on the other hand is its
+probability under the alternative, <span
+class="math inline">\(E_{R}[\mathbb{1}_{T}]\)</span>. For a given level,
+we generally want to find a test as powerful as possible.<a href="#fn1"
+class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> The
+Neyman-Pearson lemma deals with such tests.</p>
 <div class="thm*">
-<p><strong>Theorem</strong> (Neyman-Pearson lemma). <em>For any <span class="math inline">\(\tau &gt; 0\)</span>, the test <span id="eq:neyman"><span class="math display">\[T = \{\tfrac{dP_1}{dP_0} &gt; \tau \}\qquad(1)\]</span></span> is maximally powerful among all tests of its level.</em></p>
+<p><strong>Theorem</strong> (Neyman-Pearson lemma). <em>For any <span
+class="math inline">\(\tau &gt; 0\)</span>, the test <span
+id="eq:neyman"><span class="math display">\[T = \{\tfrac{dR}{dQ} &gt;
+\tau \}\qquad{(1)}\]</span></span> is maximally powerful among all tests
+of its level.</em></p>
 </div>
 <div class="proof">
-<p><em>Proof.</em> Let <span class="math inline">\(T&#39; \subseteq \mathcal{X}\)</span> be a test with <span class="math inline">\(E_{P_0}[\mathbb{1}_{T&#39;}] = E_{P_0}[\mathbb{1}_T]\)</span>. Then <span class="math display">\[\begin{align*}
-    E_{P_1}[\mathbb{1}_{T}] - E_{P_1}[\mathbb{1}_{T&#39;}] &amp;= E_{P_0}[\tfrac{dP_{1}}{dP_0}(\mathbb{1}_{T} - \mathbb{1}_{T&#39;})] \\
-    &amp;= E_{P_0}[(\tfrac{dP_{1}}{dP_0} - \tau)(\mathbb{1}_{T} - \mathbb{1}_{T&#39;})] \\
-    &amp;\phantom{=} + \tau E_{P_0}[\mathbb{1}_{T} - \mathbb{1}_{T&#39;}] \\
-    &amp;= E_{P_0}[(\tfrac{dP_{1}}{dP_0} - \tau)(\mathbb{1}_{T} - \mathbb{1}_{T&#39;})] \geq 0,
-  \end{align*}\]</span> where the inequality follows from <span class="math inline">\((\tfrac{dP_{1}}{dP_0} - \tau)(\mathbb{1}_{T} - \mathbb{1}_{T&#39;}) \geq 0\)</span>, which can be seen by considering the sign of the LHS in the complementary regions <span class="math inline">\(\{ \mathbb{1}_{T} &gt; \mathbb{1}_{T&#39;} \}\)</span> and <span class="math inline">\(\{ \mathbb{1}_{T&#39;} \leq \mathbb{1}_{T} \}\)</span> separately. ◻</p>
+<p><em>Proof.</em> Let <span class="math inline">\(T&#39; \subseteq
+\mathcal{X}\)</span> be a test with <span
+class="math inline">\(E_{Q}[\mathbb{1}_{T&#39;}] =
+E_{Q}[\mathbb{1}_T]\)</span>. Then <span
+class="math display">\[\begin{align*}
+    E_{R}[\mathbb{1}_{T}] - E_{R}[\mathbb{1}_{T&#39;}] &amp;=
+E_{Q}[\tfrac{dR}{dQ}(\mathbb{1}_{T} - \mathbb{1}_{T&#39;})] \\ &amp;=
+E_{Q}[(\tfrac{dR}{dQ} - \tau)(\mathbb{1}_{T} - \mathbb{1}_{T&#39;})] \\
+    &amp;\phantom{=} + \tau E_{Q}[\mathbb{1}_{T} - \mathbb{1}_{T&#39;}]
+\\
+    &amp;= E_{Q}[(\tfrac{dR}{dQ} - \tau)(\mathbb{1}_{T} -
+\mathbb{1}_{T&#39;})] \geq 0,
+  \end{align*}\]</span> where the inequality follows from <span
+class="math inline">\((\tfrac{dR}{dQ} - \tau)(\mathbb{1}_{T} -
+\mathbb{1}_{T&#39;}) \geq 0\)</span>, which can be seen by considering
+the sign of the LHS in the complementary regions <span
+class="math inline">\(\{ \mathbb{1}_{T} &gt; \mathbb{1}_{T&#39;}
+\}\)</span> and <span class="math inline">\(\{ \mathbb{1}_{T} \leq
+\mathbb{1}_{T&#39;} \}\)</span> separately. ◻</p>
 </div>
-<p>Consider now a repeated version of the experiment, <span class="math inline">\(X_1 \times \cdots \times X_n: \Omega \to \mathcal{X}^{n}\)</span>; the sampling processes <span class="math inline">\(X_1, \ldots, X_n\)</span> are i.i.d. variables. The probability measures <span class="math inline">\(Q\)</span>, <span class="math inline">\(P_0\)</span> and <span class="math inline">\(P_1\)</span> are replaced by <span class="math inline">\(Q^{\otimes n}\)</span>, <span class="math inline">\(P_0^{\otimes n}\)</span> and <span class="math inline">\(P_1^{\otimes n}\)</span>, respectively. For a fixed threshold <span class="math inline">\(\tau\)</span>, what does the test in eq. 1 do in the limit <span class="math inline">\(n \to \infty\)</span>?</p>
+<p>Consider now a repeated version of the experiment <span
+class="math inline">\((X_1 , \ldots,  X_n): \Omega \to
+\mathcal{X}^{n}\)</span>; the sampling processes <span
+class="math inline">\(X_1, \ldots, X_n\)</span> are i.i.d. variables.
+The probability measures <span class="math inline">\(P\)</span>, <span
+class="math inline">\(Q\)</span> and <span
+class="math inline">\(R\)</span> are replaced by <span
+class="math inline">\(P^{\otimes n}\)</span>, <span
+class="math inline">\(Q^{\otimes n}\)</span> and <span
+class="math inline">\(R^{\otimes n}\)</span>, respectively. For a fixed
+threshold <span class="math inline">\(\tau\)</span>, what does the test
+in eq. 1 do in the limit <span class="math inline">\(n \to
+\infty\)</span>?</p>
 <p>First, we can obviously rewrite this test in terms of</p>
 <p><span id="eq:log_like"><span class="math display">\[\begin{aligned}
-  \tfrac{1}{n} \log(\tfrac{d P_1^{\otimes n}}{d P_0^{\otimes n}} \big|_{(x_1, \ldots, x_n)}) &amp;= \tfrac{1}{n} \log(\tfrac{d P_1}{d P_0} \big|_{x_1} \cdots \tfrac{d P_1}{d P_0} \big|_{x_n}) \\
-  &amp;= \tfrac{1}{n}(\log(\tfrac{d P_1}{d P_0} \big|_{x_1}) + \cdots + \log(\tfrac{d P_1}{d P_0} \big|_{x_n})).\end{aligned}\qquad(2)\]</span></span></p>
-<p>The strong law of large numbers (together with LOTUS) tells us that, for almost every <span class="math inline">\(\omega \in \Omega\)</span>, <span class="math display">\[\begin{gathered}
-\tfrac{1}{n}(\log(\tfrac{d P_1}{d P_0}\big|_{X_1(\omega)})+ \cdots + \log(\tfrac{d P_1}{d P_0}\big|_{X_n(\omega)})) \\
-\to E_{Q}[\log(\tfrac{dP_1}{dP_0})]\end{gathered}\]</span> as <span class="math inline">\(n \to \infty\)</span>, presuming <span class="math inline">\(E_{Q}[\log(\tfrac{dP_1}{dP_0})]\)</span> is defined. The latter is <span class="math display">\[\begin{align*}
-    E_{Q}[\log(\tfrac{dP_1}{dP_0})] &amp;=  E_{Q}[\log(\tfrac{dP_1}{dP_0} \tfrac{dQ}{dP_1} (\tfrac{dQ}{dP_1})^{-1})] \\
-    &amp;= E_{Q}[\log(\tfrac{dP_1}{dP_0} \tfrac{dQ}{dP_1})] - E_{Q}[\log(\tfrac{dQ}{dP_1})] \\
-  &amp;= E_{Q}[\log(\tfrac{dQ}{dP_{0}})] -   E_{Q}[\log(\tfrac{dQ}{dP_1})] \\
-  &amp;= D_{KL}(Q \parallel P_0) - D_{KL}(Q \parallel P_1),
-  \end{align*}\]</span> where we used the chain rule for the R-D derivative as well as our assumptions on absolute continuity. Therefore in the limit the test really amounts to the comparison <span class="math display">\[D_{KL}(Q \parallel P_0) \geq D_{KL}(Q \parallel P_1).\]</span></p>
-<p>This at once motivates the KL divergence as falling naturally from considerations on statistical testing, provides its interpretation as a measure of “divergence,” while telling us that it is really its first argument that should be regarded as the “reference” and the second as the “candidate.” It also justifies setting it to <span class="math inline">\(\infty\)</span> void of absolute continuity, since we should prefer a hypothesis in terms of which the true probability measure <span class="math inline">\(Q\)</span> may be expressed to one in terms of which it may not.</p>
-<p>This is not all! Taking <span class="math inline">\(P_0\)</span> as the reference measure on <span class="math inline">\(\mathcal{X}\)</span>, the RHS of eq. 2 is really the log-likelihood <span class="math inline">\(l_{P_1}(x_1, \ldots, x_n)\)</span>. By an argument and assumptions similar to the foregoing, <span class="math display">\[\begin{gathered}
-l_{Q}(X_1(\omega), \ldots, X_n(\omega)) - l_{P_1}(X_1(\omega), \ldots, X_n(\omega)) \\ 
-\to D_{KL}(Q \parallel P_1)\end{gathered}\]</span> for <span class="math inline">\(Q\)</span>-almost every <span class="math inline">\(\omega \in \Omega\)</span>. In <em>maximum-likelihood estimation</em> (MLE), we try to find a probability measure <span class="math inline">\(P\)</span> within some family that maximizes <span class="math inline">\(l_{P}(X_1(\omega), \ldots, X_n(\omega))\)</span>. The above tells us that, assuming the expectations involved are defined, MLE amounts to minimizing <span class="math inline">\(D_{KL}(Q \parallel P)\)</span> as <span class="math inline">\(n\)</span> grows without bounds! This is something of an argument in favor of <a href="https://plato.stanford.edu/entries/statistics/#ClaSta">frequentism</a>.</p>
+  \tfrac{1}{n} \log(\tfrac{d R^{\otimes n}}{d Q^{\otimes n}}
+\big|_{(x_1, \ldots, x_n)}) &amp;= \tfrac{1}{n} \log(\tfrac{d R}{d Q}
+\big|_{x_1} \cdots \tfrac{d R}{d Q} \big|_{x_n}) \\
+  &amp;= \tfrac{1}{n}(\log(\tfrac{d R}{d Q} \big|_{x_1}) + \cdots +
+\log(\tfrac{d R}{d Q} \big|_{x_n})).
+\end{aligned}\qquad{(2)}\]</span></span></p>
+<p>The strong law of large numbers (together with LOTUS) tells us that,
+for almost every <span class="math inline">\(\omega \in \Omega\)</span>,
+<span class="math display">\[\begin{gathered}
+\tfrac{1}{n}(\log(\tfrac{d R}{d Q}\big|_{X_1(\omega)})+ \cdots +
+\log(\tfrac{d R}{d Q}\big|_{X_n(\omega)})) \\
+\to E_{P}[\log(\tfrac{dR}{dQ})]
+\end{gathered}\]</span> as <span class="math inline">\(n \to
+\infty\)</span>, presuming <span
+class="math inline">\(E_{P}[\log(\tfrac{dR}{dQ})]\)</span> is defined.
+The latter is <span class="math display">\[\begin{align*}
+    E_{P}[\log(\tfrac{dR}{dQ})] &amp;=  E_{P}[\log(\tfrac{dR}{dQ}
+\tfrac{dP}{dR} (\tfrac{dP}{dR})^{-1})] \\
+    &amp;= E_{P}[\log(\tfrac{dR}{dQ} \tfrac{dP}{dR})] -
+E_{P}[\log(\tfrac{dP}{dR})] \\
+  &amp;= E_{P}[\log(\tfrac{dP}{dQ})] - E_{P}[\log(\tfrac{dP}{dR})] \\
+  &amp;= D_{KL}(P \parallel Q) - D_{KL}(P \parallel R),
+  \end{align*}\]</span> where we used the chain rule for the R-D
+derivative as well as our assumptions on absolute continuity. Therefore
+in the limit the test really amounts to acertaining the inequality <span
+class="math display">\[D_{KL}(P \parallel Q) \geq D_{KL}(P \parallel
+R).\]</span></p>
+<p>This at once motivates the KL divergence as falling naturally from
+considerations on statistical testing, provides its interpretation as a
+measure of “divergence,” while telling us that it is really its first
+argument that should be regarded as the “reference” and the second as
+the “candidate.” It also justifies setting it to <span
+class="math inline">\(\infty\)</span> void of absolute continuity, since
+we should prefer a hypothesis in terms of which the true probability
+measure <span class="math inline">\(P\)</span> may be expressed to one
+in terms of which it may not.</p>
+<p>This is not all! Taking <span class="math inline">\(Q\)</span> as the
+reference measure on <span class="math inline">\(\mathcal{X}\)</span>,
+the RHS of eq. 2 is really the log-likelihood <span
+class="math inline">\(l_{R}(x_1, \ldots, x_n)\)</span>. By an argument
+and assumptions similar to the foregoing, <span
+class="math display">\[\begin{gathered}
+l_{P}(X_1(\omega), \ldots, X_n(\omega)) - l_{R}(X_1(\omega), \ldots,
+X_n(\omega)) \\
+\to D_{KL}(P \parallel R)
+\end{gathered}\]</span> as <span class="math inline">\(n \to
+\infty\)</span>, for almost every <span class="math inline">\(\omega \in
+\Omega\)</span>. In <em>maximum-likelihood estimation</em> (MLE), we try
+to find a probability measure within some family that maximizes
+log-likelihood. The above tells us that, assuming the expectations
+involved are defined, MLE is the finite-sample version of minimizing the
+KL divergence over its second argument. This is something of an argument
+in favor of <a
+href="https://plato.stanford.edu/entries/statistics/#ClaSta">frequentism</a>.</p>
 <h2 id="variational-representation">3. Variational Representation</h2>
-<p>In this section we prove a very useful characterization of the KL divergence and establish some of its consequences. We place ourselves in a measurable space <span class="math inline">\((\mathcal{X}, \sigma_{\mathcal{X}})\)</span> and denote by <span class="math inline">\(B(\mathcal{X})\)</span> the space of bounded measurable functions <span class="math inline">\(\mathcal{X}\to \mathbb{R}\)</span>.</p>
+<p>In this section we prove a very useful characterization of the KL
+divergence and establish some of its consequences. We place ourselves in
+a measurable space <span class="math inline">\((\mathcal{X},
+\sigma_{\mathcal{X}})\)</span> and denote by <span
+class="math inline">\(B(\mathcal{X})\)</span> the space of bounded
+measurable functions <span class="math inline">\(\mathcal{X}\to
+\mathbb{R}\)</span>.</p>
 <div class="thm*">
-<p><strong>Theorem</strong> (variational representation). <em>We have <span id="eq:var_rep"><span class="math display">\[D_{KL}(P \parallel Q) = \sup_{f \in B(\mathcal{X})} E_{P}[f] - \log E_{Q}[e^{f}].\qquad(3)\]</span></span></em></p>
+<p><strong>Theorem</strong> (variational representation). <em>We have
+<span id="eq:var_rep"><span class="math display">\[D_{KL}(P \parallel Q)
+= \sup_{f \in B(\mathcal{X})} E_{P}[f] - \log
+E_{Q}[e^{f}].\qquad{(3)}\]</span></span></em></p>
 </div>
 <div class="proof">
-<p><em>Proof.</em> If <span class="math inline">\(P \not\!\!\ll Q\)</span>, then there is an <span class="math inline">\(M \in \sigma_{\mathcal{X}}\)</span> such that <span class="math inline">\(Q(M) = 0\)</span> and <span class="math inline">\(P(M) &gt; 0\)</span>. For any <span class="math inline">\(c \geq 0\)</span>, we have <span class="math inline">\(E_{P}[c \mathbb{1}_{M}] - \log E_{Q}[e^{c \mathbb{1}_{M}}] = c P(M)\)</span>, which grows without bounds as <span class="math inline">\(c \to \infty\)</span>, showing that eq. 3 holds.</p>
-<p>So assume <span class="math inline">\(P \ll Q\)</span>. We first argue the weaker equality <span id="eq:var_rep_inter"><span class="math display">\[D_{KL}(P \parallel Q) = \sup_{\substack{f \in B(\mathcal{X}) \\ E_{Q}[e^{f}] = 1}} E_{P}[f].\qquad(4)\]</span></span> For any such <span class="math inline">\(f\)</span>, let <span class="math inline">\(Q&#39;\)</span> be the probability measure whose R-D derivative w.r.t. <span class="math inline">\(Q\)</span> is <span class="math inline">\(e^{f}\)</span>. Clearly <span class="math inline">\(Q \ll Q&#39;\)</span>, so <span class="math inline">\(P \ll Q&#39;\)</span> and, by the chain rule of the R-D derivative, <span class="math display">\[\frac{dP}{dQ&#39;} = e^{-f} \frac{dP}{dQ}.\]</span> Then <span class="math display">\[\begin{aligned}
-  D_{KL}(P \parallel Q) - E_{P}[f] &amp;= E_{Q&#39;}[e^{-f} \tfrac{dP}{dQ} \log(e^{-f} \tfrac{dP}{dQ})] \\
-                       &amp;\geq 0,\end{aligned}\]</span> where the inequality follows from Jensen’s inequality. On the other hand, <span class="math inline">\(D_{KL}(P \parallel Q)\)</span> is equal to the objective on the RHS of eq. 4 for <span class="math inline">\(f = \log(\tfrac{dP}{dQ})\)</span>, though this function may not be in <span class="math inline">\(B(\mathcal{X})\)</span>. However, we can find a sequence of bounded, positive, simple functions <span class="math inline">\(\{ s_n \}_{n \in \mathbb{N}}\)</span> increasing to <span class="math inline">\(\tfrac{dP}{dQ}\)</span>. Then <span class="math inline">\(E_{Q}[s_n] \to E_{Q}[\tfrac{dP}{dQ}]\)</span> by the DCT. Consider now <span class="math inline">\(\{ \log(s_n) - \log(s_0) \}_{n \in \mathbb{N}}\)</span>: it is a sequence of positive bounded functions increasing to <span class="math inline">\(\log(\tfrac{dP}{dQ}) - \log(s_0)\)</span>. Applying the MCT to this last sequence, we see that <span class="math inline">\(E_{P}[\log(s_b)] \to E_{P}[\log(\tfrac{dP}{dQ})]\)</span>. Setting <span class="math inline">\(s&#39;_n = \log(\tfrac{s_n}{E_{Q}[s_n]})\)</span>, we have <span class="math inline">\(E_{Q}[e^{s&#39;_n}] = 1\)</span> and <span class="math inline">\(E_{P}[s&#39;_n] \to E_{P}[\log(\tfrac{dP}{dQ})]\)</span>. This establishes eq. 4.</p>
-<p>Finally, for any <span class="math inline">\(f \in B(\mathcal{X})\)</span>, we have <span class="math display">\[E_{P}[f] - \log E_{Q}[e^{f}] = E_{P}[\log(\tfrac{e^{f}}{E_{Q}[e^f]})],\]</span> and it follow from eq. 4 that the objective on the RHS of eq. 3 is never greater than <span class="math inline">\(D_{KL}(P \parallel Q)\)</span>. So eq. 3 follows immediately from eq. 4. ◻</p>
+<p><em>Proof.</em> If <span class="math inline">\(P \not\!\!\ll
+Q\)</span>, then there is an <span class="math inline">\(M \in
+\sigma_{\mathcal{X}}\)</span> such that <span class="math inline">\(Q(M)
+= 0\)</span> and <span class="math inline">\(P(M) &gt; 0\)</span>. For
+any <span class="math inline">\(c \geq 0\)</span>, we have <span
+class="math inline">\(E_{P}[c \mathbb{1}_{M}] - \log E_{Q}[e^{c
+\mathbb{1}_{M}}] = c P(M)\)</span>, which grows without bounds as <span
+class="math inline">\(c \to \infty\)</span>, showing that eq. 3
+holds.</p>
+<p>So assume <span class="math inline">\(P \ll Q\)</span>. We first
+argue the weaker equality <span id="eq:var_rep_inter"><span
+class="math display">\[D_{KL}(P \parallel Q) = \sup_{\substack{f \in
+B(\mathcal{X}) \\ E_{Q}[e^{f}] = 1}}
+E_{P}[f].\qquad{(4)}\]</span></span> For any such <span
+class="math inline">\(f\)</span>, let <span
+class="math inline">\(Q&#39;\)</span> be the probability measure whose
+R-D derivative w.r.t. <span class="math inline">\(Q\)</span> is <span
+class="math inline">\(e^{f}\)</span>. Clearly <span
+class="math inline">\(Q \ll Q&#39;\)</span>, so <span
+class="math inline">\(P \ll Q&#39;\)</span> and, by the chain rule of
+the R-D derivative, <span class="math display">\[\frac{dP}{dQ&#39;} =
+e^{-f} \frac{dP}{dQ}.\]</span> Then <span
+class="math display">\[\begin{aligned}
+  D_{KL}(P \parallel Q) - E_{P}[f] &amp;= E_{Q&#39;}[e^{-f}
+\tfrac{dP}{dQ} \log(e^{-f} \tfrac{dP}{dQ})] \\
+                       &amp;\geq 0,
+\end{aligned}\]</span> where the inequality follows from Jensen’s
+inequality. On the other hand, <span class="math inline">\(D_{KL}(P
+\parallel Q)\)</span> is equal to the objective on the RHS of eq. 4 for
+<span class="math inline">\(f = \log(\tfrac{dP}{dQ})\)</span>, though
+this function may not be in <span
+class="math inline">\(B(\mathcal{X})\)</span>. However, we can find a
+sequence of bounded, positive, simple functions <span
+class="math inline">\(\{ s_n \}_{n \in \mathbb{N}}\)</span> increasing
+to <span class="math inline">\(\tfrac{dP}{dQ}\)</span>. Then <span
+class="math inline">\(E_{Q}[s_n] \to E_{Q}[\tfrac{dP}{dQ}]\)</span> by
+the DCT. Consider now <span class="math inline">\(\{ \log(s_n) -
+\log(s_0) \}_{n \in \mathbb{N}}\)</span>: it is a sequence of positive
+bounded functions increasing to <span
+class="math inline">\(\log(\tfrac{dP}{dQ}) - \log(s_0)\)</span>.
+Applying the MCT to this last sequence, we see that <span
+class="math inline">\(E_{P}[\log(s_b)] \to
+E_{P}[\log(\tfrac{dP}{dQ})]\)</span>. Setting <span
+class="math inline">\(s&#39;_n = \log(\tfrac{s_n}{E_{Q}[s_n]})\)</span>,
+we have <span class="math inline">\(E_{Q}[e^{s&#39;_n}] = 1\)</span> and
+<span class="math inline">\(E_{P}[s&#39;_n] \to
+E_{P}[\log(\tfrac{dP}{dQ})]\)</span>. This establishes eq. 4.</p>
+<p>Finally, for any <span class="math inline">\(f \in
+B(\mathcal{X})\)</span>, we have <span class="math display">\[E_{P}[f] -
+\log E_{Q}[e^{f}] = E_{P}[\log(\tfrac{e^{f}}{E_{Q}[e^f]})],\]</span> and
+it follow from eq. 4 that the objective on the RHS of eq. 3 is never
+greater than <span class="math inline">\(D_{KL}(P \parallel Q)\)</span>.
+So eq. 3 follows immediately from eq. 4. ◻</p>
 </div>
-<p>Many important properties of the KL divergence can be gleaned from its variational representation. First, we have the immediate corollary:</p>
+<p>Many important properties of the KL divergence can be gleaned from
+its variational representation. First, we have the immediate
+corollary:</p>
 <div class="cor*">
 <p><strong>Corollary</strong>.</p>
 <ul>
-<li><p><em>If <span class="math inline">\(\phi: (\mathcal{X}, \sigma_{\mathcal{X}}) \to (\mathcal{X}&#39;, \sigma_{\mathcal{X}&#39;})\)</span> is a measurable function to another measurable space, then <span class="math display">\[D_{KL}(P \parallel Q) \geq D_{KL}(P \circ \phi^{-1} \parallel  Q \circ \phi^{-1}).\]</span> In particular, if <span class="math inline">\(\phi\)</span> is an isomorphism of measurable spaces, then equality holds.</em></p></li>
-<li><p><em><span class="math inline">\(D_{KL}(\cdot \parallel \cdot)\)</span> is convex in its arguments in the sense that if <span class="math inline">\(P&#39;\)</span> and <span class="math inline">\(Q&#39;\)</span> are two other probability measures, then <span class="math display">\[\begin{gathered}
-        D_{KL}(\lambda P + (1 - \lambda) P&#39; \parallel \lambda Q + (1 - \lambda) Q&#39;) \leq \\ \lambda D_{KL}(P \parallel Q) + (1 - \lambda)D_{KL}(P&#39; \parallel Q&#39;)
-    \end{gathered}\]</span> for any <span class="math inline">\(\lambda \in [0, 1]\)</span>.</em></p></li>
+<li><p><em>If <span class="math inline">\(\phi: (\mathcal{X},
+\sigma_{\mathcal{X}}) \to (\mathcal{X}&#39;,
+\sigma_{\mathcal{X}&#39;})\)</span> is a measurable function to another
+measurable space, then <span class="math display">\[D_{KL}(P \parallel
+Q) \geq D_{KL}(P \circ \phi^{-1} \parallel  Q \circ \phi^{-1}).\]</span>
+In particular, if <span class="math inline">\(\phi\)</span> is an
+isomorphism of measurable spaces, then equality holds.</em></p></li>
+<li><p>*<span class="math inline">\(D_{KL}(\cdot \parallel
+\cdot)\)</span> is convex in its arguments in the sense that if <span
+class="math inline">\(P&#39;\)</span> and <span
+class="math inline">\(R\)</span> are two other probability measures,
+then $$</p>
+<span class="math display">\[\begin{gathered}
+        D_{KL}(\lambda P + (1 - \lambda) P&#39; \parallel \lambda Q + (1
+- \lambda) R) \leq \\ \lambda D_{KL}(P \parallel Q) + (1 -
+\lambda)D_{KL}(P&#39; \parallel R)
+
+\end{gathered}\]</span>
+<p>$$ for any <span class="math inline">\(\lambda \in [0,
+1]\)</span>.*</p></li>
 </ul>
 </div>
-<p>When the space <span class="math inline">\(\mathcal{X}\)</span> is <a href="https://en.wikipedia.org/wiki/Standard_Borel_space">standard Borel</a>, the variational representation eq. 3 admits the following useful variant:</p>
+<p>When the space <span class="math inline">\(\mathcal{X}\)</span> is <a
+href="https://en.wikipedia.org/wiki/Standard_Borel_space">standard
+Borel</a>, the variational representation eq. 3 admits the following
+useful variant:</p>
 <div class="prop*">
-<p><strong>Proposition</strong>. <em>In a standard Borel space <span class="math inline">\((\mathcal{X}, \mathcal{B}(\mathcal{X}))\)</span>, we have <span id="eq:var_rep_2"><span class="math display">\[D_{KL}(P \parallel Q) = \sup_{f \in C_b(\mathcal{X})} E_{P}[f] - \log E_{Q}[e^{f}],\qquad(5)\]</span></span> where <span class="math inline">\(C_b(\mathcal{X})\)</span> is the space of continuous bounded functions.</em></p>
+<p><strong>Proposition</strong>. <em>In a standard Borel space <span
+class="math inline">\((\mathcal{X}, \mathcal{B}(\mathcal{X}))\)</span>,
+we have <span id="eq:var_rep_2"><span class="math display">\[D_{KL}(P
+\parallel Q) = \sup_{f \in C_b(\mathcal{X})} E_{P}[f] - \log
+E_{Q}[e^{f}],\qquad{(5)}\]</span></span> where <span
+class="math inline">\(C_b(\mathcal{X})\)</span> is the space of
+continuous bounded functions.</em></p>
 </div>
 <div class="proof">
-<p><em>Proof.</em> We will argue that any function <span class="math inline">\(g \in B(\mathcal{X})\)</span> can be approximated in <span class="math inline">\(L^1_P(\mathcal{X})\)</span> and <span class="math inline">\(L^1_Q(\mathcal{X})\)</span> simultaneously by a sequence of functions in <span class="math inline">\(C_b(\mathcal{X})\)</span>. As simple functions can also approximate <span class="math inline">\(g\)</span> in <span class="math inline">\(L^1_P(\mathcal{X})\)</span> and <span class="math inline">\(L^1_Q(\mathcal{X})\)</span> simultaneously, and these are linearly generated by indicator functions, it suffices to argue the special case where <span class="math inline">\(g\)</span> is an indicator function.</p>
-<p>First, we note that finite measures on standard Borel spaces are outer regular (see Prop. 2.3 <a href="https://www.mat.unb.br/cioletti/itmg-02-2012/pdfs/Probability%20measures%20on%20metric%20spaces%20-%20Onno%20van%20Gaans.pdf">here</a>). Thus for any <span class="math inline">\(M \in \mathcal{B}(\mathcal{X})\)</span>, we may find a descending sequence <span class="math inline">\(\{ O_n \}_{n \in \mathbb{R}}\)</span> of open sets each containing <span class="math inline">\(M\)</span> such that <span class="math display">\[\begin{aligned}
-  P(M) &amp;= \lim_{n \to \infty} P(O_n) \text{ and } \\ 
-  Q(M) &amp;= \lim_{n \to \infty} Q(O_n). \end{aligned}\]</span> Let <span class="math inline">\(d: \mathcal{X}\times \mathcal{X}\to \mathcal{X}\)</span> be a metric compatible with the topology of <span class="math inline">\(\mathcal{X}\)</span> and define <span class="math display">\[f_n(x) = \min(1, n \, d(x, O_n^{c})).\]</span> The sequence <span class="math inline">\(\{ f_n \}_{n \in \mathbb{R}}\)</span> is in <span class="math inline">\(C_{b}(\mathcal{X})\)</span>, converges <span class="math inline">\(P\)</span>- and <span class="math inline">\(Q\)</span>-a.s. to <span class="math inline">\(\mathbb{1}_{M}\)</span>, and is dominated by <span class="math inline">\(1\)</span>. Invoking the DCT, we see that it converges to <span class="math inline">\(\mathbb{1}_{M}\)</span> in both <span class="math inline">\(L^1_P(\mathcal{X})\)</span> and <span class="math inline">\(L^1_Q(\mathcal{X})\)</span>. ◻</p>
+<p><em>Proof.</em> We will argue that any function <span
+class="math inline">\(g \in B(\mathcal{X})\)</span> can be approximated
+in <span class="math inline">\(L^1_P(\mathcal{X})\)</span> and <span
+class="math inline">\(L^1_Q(\mathcal{X})\)</span> simultaneously by a
+sequence of functions in <span
+class="math inline">\(C_b(\mathcal{X})\)</span>. As simple functions can
+also approximate <span class="math inline">\(g\)</span> in <span
+class="math inline">\(L^1_P(\mathcal{X})\)</span> and <span
+class="math inline">\(L^1_Q(\mathcal{X})\)</span> simultaneously, and
+these are linearly generated by indicator functions, it suffices to
+argue the special case where <span class="math inline">\(g\)</span> is
+an indicator function.</p>
+<p>First, we note that finite measures on standard Borel spaces are
+outer regular (see Prop. 2.3 <a
+href="https://www.mat.unb.br/cioletti/itmg-02-2012/pdfs/Probability%20measures%20on%20metric%20spaces%20-%20Onno%20van%20Gaans.pdf">here</a>).
+Thus for any <span class="math inline">\(M \in
+\mathcal{B}(\mathcal{X})\)</span>, we may find a descending sequence
+<span class="math inline">\(\{ O_n \}_{n \in \mathbb{R}}\)</span> of
+open sets each containing <span class="math inline">\(M\)</span> such
+that <span class="math display">\[\begin{aligned}
+  P(M) &amp;= \lim_{n \to \infty} P(O_n) \text{ and } \\
+  Q(M) &amp;= \lim_{n \to \infty} Q(O_n).
+\end{aligned}\]</span> Let <span class="math inline">\(d:
+\mathcal{X}\times \mathcal{X}\to \mathcal{X}\)</span> be a metric
+compatible with the topology of <span
+class="math inline">\(\mathcal{X}\)</span> and define <span
+class="math display">\[f_n(x) = \min(1, n \, d(x, O_n^{c})).\]</span>
+The sequence <span class="math inline">\(\{ f_n \}_{n \in
+\mathbb{R}}\)</span> is in <span
+class="math inline">\(C_{b}(\mathcal{X})\)</span>, converges <span
+class="math inline">\(P\)</span>- and <span
+class="math inline">\(Q\)</span>-a.s. to <span
+class="math inline">\(\mathbb{1}_{M}\)</span>, and is dominated by <span
+class="math inline">\(1\)</span>. Invoking the DCT, we see that it
+converges to <span class="math inline">\(\mathbb{1}_{M}\)</span> in both
+<span class="math inline">\(L^1_P(\mathcal{X})\)</span> and <span
+class="math inline">\(L^1_Q(\mathcal{X})\)</span>. ◻</p>
 </div>
-<p>From this follows a corollary which will be needed in the next section.</p>
+<p>From this follows a corollary which will be needed in the next
+section.</p>
 <div class="cor*">
-<p><strong>Corollary</strong> (lower semicontinuity). <em>In a standard Borel space <span class="math inline">\((\mathcal{X}, \mathcal{B}(\mathcal{X}))\)</span>, the KL divergence is lower semicontinuous in the sense that if <span class="math inline">\(\{ P_{n} \}_{n \in \mathbb{R}}\)</span> and <span class="math inline">\(\{ Q_{n} \}_{n \in \mathbb{R}}\)</span> <a href="https://en.wikipedia.org/wiki/Convergence_of_measures#Weak_convergence_of_measures">converge weakly</a> to <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> respectively, then <span class="math display">\[D_{KL}(P \parallel Q) \leq \liminf_{n \to \infty} D_{KL}(P_n \parallel Q_n)\]</span></em></p>
+<p><strong>Corollary</strong> (lower semicontinuity). <em>In a standard
+Borel space <span class="math inline">\((\mathcal{X},
+\mathcal{B}(\mathcal{X}))\)</span>, the KL divergence is lower
+semicontinuous in the sense that if <span class="math inline">\(\{ P_{n}
+\}_{n \in \mathbb{R}}\)</span> and <span class="math inline">\(\{ Q_{n}
+\}_{n \in \mathbb{R}}\)</span> <a
+href="https://en.wikipedia.org/wiki/Convergence_of_measures#Weak_convergence_of_measures">converge
+weakly</a> to <span class="math inline">\(P\)</span> and <span
+class="math inline">\(Q\)</span> respectively, then <span
+class="math display">\[D_{KL}(P \parallel Q) \leq \liminf_{n \to \infty}
+D_{KL}(P_n \parallel Q_n)\]</span></em></p>
 </div>
 <div class="proof">
-<p><em>Proof.</em> For any <span class="math inline">\(f \in C_b(\mathcal{X})\)</span>, let <span class="math inline">\(\phi_{f}\)</span> be the functional on pairs of probability measures defined by <span class="math inline">\(\phi_f(P&#39;, Q&#39;) = E_{P&#39;}[f] - E_{Q&#39;}[e^{f}]\)</span>. Clearly, this functional is continuous and so <span class="math display">\[\lim_{n \to \infty} \phi_f(P_n, Q_n) = \liminf_{n \to \infty} \phi_f(P_n, Q_n) = \phi_f(P, Q).\]</span> Obviously, <span class="math inline">\(\phi_f(P_n, Q_n) \leq D_{KL}(P_n \parallel Q_n)\)</span> and, taking the limit inferior on either side, <span class="math display">\[\phi_f(P, Q) \leq \liminf_{n \to \infty} D_{KL}(P_n \parallel Q_n).\]</span> Since this last inequality holds for all <span class="math inline">\(f \in C_b(\mathcal{X})\)</span>, we conclude that the supremum of its LHS over <span class="math inline">\(C_{b}(\mathcal{X})\)</span>, which is precisely <span class="math inline">\(D_{KL}(P \parallel Q)\)</span>, is no greater than its RHS. ◻</p>
+<p><em>Proof.</em> For any <span class="math inline">\(f \in
+C_b(\mathcal{X})\)</span>, let <span
+class="math inline">\(\phi_{f}\)</span> be the functional on pairs of
+probability measures defined by <span
+class="math inline">\(\phi_f(P&#39;, R) = E_{P&#39;}[f] -
+E_{R}[e^{f}]\)</span>. Clearly, this functional is continuous and so
+<span class="math display">\[\lim_{n \to \infty} \phi_f(P_n, Q_n) =
+\liminf_{n \to \infty} \phi_f(P_n, Q_n) = \phi_f(P, Q).\]</span>
+Obviously, <span class="math inline">\(\phi_f(P_n, Q_n) \leq D_{KL}(P_n
+\parallel Q_n)\)</span> and, taking the limit inferior on either side,
+<span class="math display">\[\phi_f(P, Q) \leq \liminf_{n \to \infty}
+D_{KL}(P_n \parallel Q_n).\]</span> Since this last inequality holds for
+all <span class="math inline">\(f \in C_b(\mathcal{X})\)</span>, we
+conclude that the supremum of its LHS over <span
+class="math inline">\(C_{b}(\mathcal{X})\)</span>, which is precisely
+<span class="math inline">\(D_{KL}(P \parallel Q)\)</span>, is no
+greater than its RHS. ◻</p>
 </div>
-<p>It should be emphasized that the KL divergence is in general <em>only</em> lower semicontinuous and not continuous proper. See <a href="https://math.stackexchange.com/a/4067107">this</a> answer on Math Stack Exchange for a counterexample.</p>
+<p>It should be emphasized that the KL divergence is in general
+<em>only</em> lower semicontinuous and not continuous proper. See <a
+href="https://math.stackexchange.com/a/4067107">this</a> answer on Math
+Stack Exchange for a counterexample.</p>
 <h2 id="chain-rule">4. Chain Rule</h2>
-<p>Let <span class="math inline">\(\mathcal{E}_1\)</span> and <span class="math inline">\(\mathcal{E}_2\)</span> be standard Borel spaces and <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> probability measures on the product <span class="math inline">\(\mathcal{E}= \mathcal{E}_1 \times \mathcal{E}_2\)</span>. Denote by <span class="math inline">\(\pi_i: \mathcal{E}\to \mathcal{E}_i\)</span> the projections. We will write <span class="math inline">\(P_i = P \! \circ \!\pi_{i}^{-1}\)</span> and <span class="math inline">\(Q_i = Q \! \circ \!\pi_{i}^{-1}\)</span>. This setting leads to an important decomposition of the KL divergence <span class="math inline">\(D_{KL}(P \parallel Q)\)</span> in terms of <span class="math inline">\(P_i\)</span> and <span class="math inline">\(Q_i\)</span>. Before getting to it, we will need a definition:</p>
+<p>Let <span class="math inline">\(\mathcal{E}_1\)</span> and <span
+class="math inline">\(\mathcal{E}_2\)</span> be standard Borel spaces
+and <span class="math inline">\(P\)</span> and <span
+class="math inline">\(Q\)</span> probability measures on the product
+<span class="math inline">\(\mathcal{E}= \mathcal{E}_1 \times
+\mathcal{E}_2\)</span>. Denote by <span class="math inline">\(\pi_i:
+\mathcal{E}\to \mathcal{E}_i\)</span> the projections. We will write
+<span class="math inline">\(P_i = P \! \circ \!\pi_{i}^{-1}\)</span> and
+<span class="math inline">\(Q_i = Q \! \circ \!\pi_{i}^{-1}\)</span>.
+This setting leads to an important decomposition of the KL divergence
+<span class="math inline">\(D_{KL}(P \parallel Q)\)</span> in terms of
+<span class="math inline">\(P_i\)</span> and <span
+class="math inline">\(Q_i\)</span>. Before getting to it, we will need a
+definition:</p>
 <div class="def*">
-<p><strong>Definition</strong>. A <em>regular conditional probability for <span class="math inline">\(P\)</span> given <span class="math inline">\(\pi_1\)</span></em> is a mapping <span class="math inline">\(\mathcal{B}(\mathcal{E}_2) \times \mathcal{E}_1 \to [0, 1]\)</span>, which we write <span class="math display">\[(B, x) \mapsto P^{x}(B),\]</span> such that</p>
+<p><strong>Definition</strong>. A <em>regular conditional probability
+for <span class="math inline">\(P\)</span> given <span
+class="math inline">\(\pi_1\)</span></em> is a mapping <span
+class="math inline">\(\mathcal{B}(\mathcal{E}_2) \times \mathcal{E}_1
+\to [0, 1]\)</span>, which we write <span class="math display">\[(B, x)
+\mapsto P^{x}(B),\]</span> such that</p>
 <ol type="i">
-<li><p>with <span class="math inline">\(B \in \mathcal{B}(\mathcal{E}_2)\)</span> fixed, the map <span class="math inline">\(x \mapsto P^x(B)\)</span> is Borel, and for <span class="math inline">\(A = A_1 \times A_2\)</span> where <span class="math inline">\(A_i \in \mathcal{B}(\mathcal{E}_i)\)</span> we have <span class="math display">\[P(A) = \int_{A_1} P^x(A_2) \,  P_1(dx).\]</span></p></li>
-<li><p>With <span class="math inline">\(x \in \mathcal{E}_1\)</span> fixed, the map <span class="math inline">\(B \mapsto P^x(B)\)</span> is a probability measure on <span class="math inline">\(\mathcal{E}_2\)</span>.</p></li>
+<li><p>with <span class="math inline">\(B \in
+\mathcal{B}(\mathcal{E}_2)\)</span> fixed, the map <span
+class="math inline">\(x \mapsto P^x(B)\)</span> is Borel, and for <span
+class="math inline">\(A = A_1 \times A_2\)</span> where <span
+class="math inline">\(A_i \in \mathcal{B}(\mathcal{E}_i)\)</span> we
+have <span class="math display">\[P(A) = \int_{A_1} P^x(A_2)
+\,  P_1(dx).\]</span></p></li>
+<li><p>With <span class="math inline">\(x \in \mathcal{E}_1\)</span>
+fixed, the map <span class="math inline">\(B \mapsto P^x(B)\)</span> is
+a probability measure on <span
+class="math inline">\(\mathcal{E}_2\)</span>.</p></li>
 </ol>
-<p>By way of arguments analogous to those used to prove Fubini’s theorem, i. and ii. imply the further property</p>
+<p>By way of arguments analogous to those used to prove Fubini’s
+theorem, i. and ii. imply the further property</p>
 <ol start="3" type="i">
-<li>For a random variable <span class="math inline">\(X: \mathcal{E}\to \mathbb{R}\)</span>, <span class="math display">\[E_{P}[X] = \iint X(x, y) \,  P^x(dy) \, P_1(dx).\]</span> whenever the LHS is defined.</li>
+<li>For a random variable <span class="math inline">\(X: \mathcal{E}\to
+\mathbb{R}\)</span>, <span class="math display">\[E_{P}[X] = \iint X(x,
+y) \,  P^x(dy) \, P_1(dx).\]</span> whenever the LHS is defined.</li>
 </ol>
 </div>
-<p>When the <span class="math inline">\(\mathcal{E}_i\)</span>’s have background probability measures <span class="math inline">\(\mu_i\)</span> (e.g. the Lebesgue or counting measure as applicable) and <span class="math inline">\(P\)</span> is absolutely continuous w.r.t. their product <span class="math inline">\(\mu = \mu_1 \times \mu_2\)</span>, then <span class="math display">\[P^x(B) = 
+<p>When the <span class="math inline">\(\mathcal{E}_i\)</span>’s have
+background probability measures <span
+class="math inline">\(\mu_i\)</span> (e.g. the Lebesgue or counting
+measure as applicable) and <span class="math inline">\(P\)</span> is
+absolutely continuous w.r.t. their product <span
+class="math inline">\(\mu = \mu_1 \times \mu_2\)</span>, then <span
+class="math display">\[P^x(B) =
 \begin{cases}
-  \frac{\int_B \tfrac{d P}{d \mu}\bigg|_{(x, y)} \, \mu_2 (dy)}{\int \tfrac{dP}{d \mu}\bigg|_{(x, y)} \, \mu_2 (dy)} \text{ if denom. is not $0$} \\
+  \frac{\int_B \tfrac{d P}{d \mu}\bigg|_{(x, y)} \, \mu_2 (dy)}{\int
+\tfrac{dP}{d \mu}\bigg|_{(x, y)} \, \mu_2 (dy)} \text{ if denom. is not
+$0$} \\
   \delta_z(B) \text{ otherwise}
-\end{cases},\]</span> where <span class="math inline">\(z\)</span> is any one element of <span class="math inline">\(\mathcal{E}_2\)</span>, is a regular conditional probability. This follows from <span class="math display">\[\tfrac{dP_1}{d\mu_1} \big|_{x} = \int \tfrac{dP}{d \mu} \big|_{(x, y)} \, \mu_2 (dy).\]</span> More generally, in our setting of standard Borel spaces, a regular conditional probability always exists and is unique in the sense that any two regular conditional probabilities will define the same measure on <span class="math inline">\(\mathcal{E}_2\)</span> (as per ii.) for <span class="math inline">\(P_1\)</span>-almost every <span class="math inline">\(x \in \mathcal{E}_1\)</span> (see Thm. 2.29 <a href="https://www.math.leidenuniv.nl/%7Evangaans/TA2011-gradient-mei11.pdf">here</a>).</p>
-<p>Denote by <span class="math inline">\(\mathcal{M}(\mathcal{E}_{2})\)</span> the space of Borel probability measures on <span class="math inline">\(\mathcal{E}_2\)</span>. It is a standard result that the Borel <span class="math inline">\(\sigma\)</span>-algebra <span class="math inline">\(\mathcal{B}(\mathcal{M}(\mathcal{E}_2))\)</span> corresponding to the topology of weak convergence on <span class="math inline">\(\mathcal{M}(\mathcal{E}_2)\)</span> is the smallest for which all the functions <span class="math inline">\(f_B: P&#39; \in \mathcal{M}(\mathcal{E}_2) \mapsto P&#39;(B)\)</span>, for <span class="math inline">\(B \in \mathcal{B}(\mathcal{E}_2)\)</span>, are measurable (see Prop. 7.25 <a href="https://dspace.mit.edu/bitstream/handle/1721.1/4852/chap5-7.pdf?sequence=4&amp;isAllowed=y">here</a>). Since composing <span class="math inline">\(f_B\)</span> with <span class="math inline">\(x \mapsto P^{x}\)</span> gives the measurable function <span class="math inline">\(x \mapsto P^{x}(B)\)</span>, it follows that <span class="math inline">\(x \mapsto P^{x}\)</span> is measurable.</p>
+\end{cases},\]</span> where <span class="math inline">\(z\)</span> is
+any one element of <span class="math inline">\(\mathcal{E}_2\)</span>,
+is a regular conditional probability. This follows from <span
+class="math display">\[\tfrac{dP_1}{d\mu_1} \big|_{x} = \int
+\tfrac{dP}{d \mu} \big|_{(x, y)} \, \mu_2 (dy).\]</span> More generally,
+in our setting of standard Borel spaces, a regular conditional
+probability always exists and is unique in the sense that any two
+regular conditional probabilities will define the same measure on <span
+class="math inline">\(\mathcal{E}_2\)</span> (as per ii.) for <span
+class="math inline">\(P_1\)</span>-almost every <span
+class="math inline">\(x \in \mathcal{E}_1\)</span> (see Thm. 2.29 <a
+href="https://www.math.leidenuniv.nl/%7Evangaans/TA2011-gradient-mei11.pdf">here</a>).</p>
+<p>Denote by <span
+class="math inline">\(\mathcal{M}(\mathcal{E}_{2})\)</span> the space of
+Borel probability measures on <span
+class="math inline">\(\mathcal{E}_2\)</span>. It is a standard result
+that the Borel <span class="math inline">\(\sigma\)</span>-algebra <span
+class="math inline">\(\mathcal{B}(\mathcal{M}(\mathcal{E}_2))\)</span>
+corresponding to the topology of weak convergence on <span
+class="math inline">\(\mathcal{M}(\mathcal{E}_2)\)</span> is the
+smallest for which all the functions <span class="math inline">\(f_B:
+P&#39; \in \mathcal{M}(\mathcal{E}_2) \mapsto P&#39;(B)\)</span>, for
+<span class="math inline">\(B \in \mathcal{B}(\mathcal{E}_2)\)</span>,
+are measurable (see Prop. 7.25 <a
+href="https://dspace.mit.edu/bitstream/handle/1721.1/4852/chap5-7.pdf?sequence=4&amp;isAllowed=y">here</a>).
+Since composing <span class="math inline">\(f_B\)</span> with <span
+class="math inline">\(x \mapsto P^{x}\)</span> gives the measurable
+function <span class="math inline">\(x \mapsto P^{x}(B)\)</span>, it
+follows that <span class="math inline">\(x \mapsto P^{x}\)</span> is
+measurable.</p>
 <p>We can now state the result at the heart of this section.</p>
 <div class="thm*">
-<p><strong>Theorem</strong> (chain rule). <em>Let <span class="math inline">\((B, x) \mapsto Q^x(B)\)</span> be a (the) regular conditional probability for <span class="math inline">\(Q\)</span> given <span class="math inline">\(\pi_1\)</span>. Then <span class="math inline">\(x \mapsto D_{KL}(P^x \parallel Q^x)\)</span> is Borel and <span id="eq:chain_rule"><span class="math display">\[\begin{aligned}
+<p><strong>Theorem</strong> (chain rule). <em>Let <span
+class="math inline">\((B, x) \mapsto Q^x(B)\)</span> be a (the) regular
+conditional probability for <span class="math inline">\(Q\)</span> given
+<span class="math inline">\(\pi_1\)</span>. Then <span
+class="math inline">\(x \mapsto  D_{KL}(P^x \parallel Q^x)\)</span> is
+Borel and <span id="eq:chain_rule"><span
+class="math display">\[\begin{aligned}
   D_{KL}(P \parallel Q) &amp;= D_{KL}(P_1 \parallel Q_1) \ + \\
-  &amp;\phantom{=} \int D_{KL}(P^x \parallel Q^x) \, P_1(dx). \end{aligned}\qquad(6)\]</span></span></em></p>
+  &amp;\phantom{=} \int D_{KL}(P^x \parallel Q^x) \, P_1(dx).
+\end{aligned}\qquad{(6)}\]</span></span></em></p>
 </div>
 <div class="proof">
-<p><em>Proof.</em> Since the KL divergence is lower semicontinuous, it is measurable. The map <span class="math inline">\(x \mapsto D_{KL}(P^x \parallel Q^x)\)</span> is therefore the composition of measurable maps and so is itself measurable.</p>
-<p>Now onto the second part of the claim. Assume first that the RHS of eq. 6 is finite. We argue that <span class="math inline">\(P \ll Q\)</span>. To this end, suppose that <span class="math inline">\(Q(N_1 \times N_2) = 0\)</span> for some <span class="math inline">\(N_i \in \mathcal{B}(\mathcal{E}_i)\)</span>. (It is sufficient to deal with such products since <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> are outer regular and open subsets are countably generated by those products.) Then Property i. implies that <span class="math inline">\(Q^x(N_2)\)</span> vanishes for <span class="math inline">\(Q_1\)</span>-almost every <span class="math inline">\(x \in \mathcal{B}(\mathcal{E}_1)\)</span>. Since <span class="math inline">\(P^x \ll Q^x\)</span> for <span class="math inline">\(Q_1\)</span>-almost every <span class="math inline">\(x \in \mathcal{B}(\mathcal{E}_1)\)</span> (why?), <span class="math inline">\(P(N_1 \times N_2) = 0\)</span> by i. again. Therefore <span class="math inline">\(P \ll Q\)</span> indeed.</p>
-<p>So if <span class="math inline">\(P \not\!\!\!{\ll} Q\)</span> then both sides of eq. 6 are infinite; we can assume <span class="math inline">\(P \ll Q\)</span> from this point. As <span class="math inline">\(\pi_i\)</span> has a right inverse, this <a href="https://math.stackexchange.com/a/4413000">implies that</a> <span class="math inline">\(P_i \ll Q_i\)</span> and that <span class="math inline">\(\tfrac{dP_i}{dQ_i} = \tfrac{dP}{dQ} \circ \pi^{-1}_i\)</span>. Let <span class="math inline">\(A = A_1 \times A_2\)</span>, where <span class="math inline">\(A_i \in \mathcal{B}(\mathcal{E}_i)\)</span>. Let <span class="math inline">\(\rho = \tfrac{d P \circ \pi^{-1}}{d Q \circ \pi^{-1}}\)</span> for shorthand. Then by i. <span class="math display">\[\begin{aligned}
+<p><em>Proof.</em> Since the KL divergence is lower semicontinuous, it
+is measurable. The map <span class="math inline">\(x \mapsto  D_{KL}(P^x
+\parallel Q^x)\)</span> is therefore the composition of measurable maps
+and so is itself measurable.</p>
+<p>Now onto the second part of the claim. Assume first that the RHS of
+eq. 6 is finite. We argue that <span class="math inline">\(P \ll
+Q\)</span>. To this end, suppose that <span class="math inline">\(Q(N_1
+\times N_2) = 0\)</span> for some <span class="math inline">\(N_i \in
+\mathcal{B}(\mathcal{E}_i)\)</span>. (It is sufficient to deal with such
+products since <span class="math inline">\(P\)</span> and <span
+class="math inline">\(Q\)</span> are outer regular and open subsets are
+countably generated by those products.) Then Property i. implies that
+<span class="math inline">\(Q^x(N_2)\)</span> vanishes for <span
+class="math inline">\(Q_1\)</span>-almost every <span
+class="math inline">\(x \in \mathcal{B}(\mathcal{E}_1)\)</span>. Since
+<span class="math inline">\(P^x \ll Q^x\)</span> for <span
+class="math inline">\(Q_1\)</span>-almost every <span
+class="math inline">\(x \in \mathcal{B}(\mathcal{E}_1)\)</span> (why?),
+<span class="math inline">\(P(N_1 \times N_2) = 0\)</span> by i. again.
+Therefore <span class="math inline">\(P \ll Q\)</span> indeed.</p>
+<p>So if <span class="math inline">\(P \not\!\!\!{\ll} Q\)</span> then
+both sides of eq. 6 are infinite; we can assume <span
+class="math inline">\(P \ll Q\)</span> from this point. As <span
+class="math inline">\(\pi_i\)</span> has a right inverse, this <a
+href="https://math.stackexchange.com/a/4413000">implies that</a> <span
+class="math inline">\(P_i \ll Q_i\)</span> and that <span
+class="math inline">\(\tfrac{dP_i}{dQ_i} = \tfrac{dP}{dQ} \circ
+\pi^{-1}_i\)</span>. Let <span class="math inline">\(A = A_1 \times
+A_2\)</span>, where <span class="math inline">\(A_i \in
+\mathcal{B}(\mathcal{E}_i)\)</span>. Let <span
+class="math inline">\(\rho = \tfrac{d P \circ \pi^{-1}}{d Q \circ
+\pi^{-1}}\)</span> for shorthand. Then by i. <span
+class="math display">\[\begin{aligned}
   P(A) &amp;= \int_{A_1} P^{x}(A_2) \, P_1(dx) \\
-  &amp;= \int_{A_1} P^{x}(A_2) \tfrac{dP_1}{dQ_1}\big|_{x} \, Q_1(dx).\end{aligned}\]</span> Also, <span class="math display">\[\begin{aligned}
+  &amp;= \int_{A_1} P^{x}(A_2) \tfrac{dP_1}{dQ_1}\big|_{x} \, Q_1(dx).
+\end{aligned}\]</span> Also, <span
+class="math display">\[\begin{aligned}
 P(A) &amp;= \int_{A} \tfrac{dP}{dQ} \, dQ \\
-&amp;= \int_{A_1} \int_{A_2} \tfrac{dP}{dQ}\big|_{(x,y)} Q^{x}(dy) \, Q_1(dx),\end{aligned}\]</span> where the second equality follows from iii. Fixing <span class="math inline">\(A_2\)</span> and letting <span class="math inline">\(A_1\)</span> vary, we see that for <span class="math inline">\(Q \circ \pi_1^{-1}\)</span>-almost every <span class="math inline">\(x\)</span>, <span id="eq:a2_equality"><span class="math display">\[P^{x}(A_2) \tfrac{dP_1}{dQ_1} \big|_{x} = \int_{A_2} \tfrac{dP}{dQ} \big|_{(x,y)} Q^{x}(dy).\qquad(7)\]</span></span> Consider a countable topological basis of <span class="math inline">\(\mathcal{E}_2\)</span>. The previous equality holds for every <span class="math inline">\(A_2\)</span> in this basis and <span class="math inline">\(Q_1\)</span>-almost every <span class="math inline">\(x\)</span> (why?). It follows in turn that it holds for any <span class="math inline">\(A_2\)</span> and <span class="math inline">\(Q_1\)</span>-almost every <span class="math inline">\(x\)</span>.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> From this it follows that <span class="math inline">\(P^{x} \ll Q^{x}\)</span> whenever <span class="math inline">\(\tfrac{dP_1}{dQ_1} \big|_{x} &gt; 0\)</span> and in that case <span class="math inline">\(\tfrac{dP^{x}}{dQ^{x}}\big|_{y} \tfrac{dP_1}{dQ_1}\big|_{x} = \tfrac{dP}{dQ}\big|_{(x,y)}\)</span>.</p>
-<p>Let <span class="math inline">\(\Gamma = \{ \tfrac{dP_1}{dQ_1} &gt; 0 \}\)</span>. Note that <span class="math inline">\(P(\Gamma \times \mathcal{E}_2) = 1\)</span> by i. Finally,</p>
+&amp;= \int_{A_1} \int_{A_2} \tfrac{dP}{dQ}\big|_{(x,y)} Q^{x}(dy) \,
+Q_1(dx),
+\end{aligned}\]</span> where the second equality follows from iii.
+Fixing <span class="math inline">\(A_2\)</span> and letting <span
+class="math inline">\(A_1\)</span> vary, we see that for <span
+class="math inline">\(Q \circ \pi_1^{-1}\)</span>-almost every <span
+class="math inline">\(x\)</span>, <span id="eq:a2_equality"><span
+class="math display">\[P^{x}(A_2) \tfrac{dP_1}{dQ_1} \big|_{x} =
+\int_{A_2} \tfrac{dP}{dQ} \big|_{(x,y)}
+Q^{x}(dy).\qquad{(7)}\]</span></span> Consider a countable topological
+basis of <span class="math inline">\(\mathcal{E}_2\)</span>. The
+previous equality holds for every <span
+class="math inline">\(A_2\)</span> in this basis and <span
+class="math inline">\(Q_1\)</span>-almost every <span
+class="math inline">\(x\)</span> (why?). It follows in turn that it
+holds for any <span class="math inline">\(A_2\)</span> and <span
+class="math inline">\(Q_1\)</span>-almost every <span
+class="math inline">\(x\)</span>.<a href="#fn2" class="footnote-ref"
+id="fnref2" role="doc-noteref"><sup>2</sup></a> From this it follows
+that <span class="math inline">\(P^{x} \ll Q^{x}\)</span> whenever <span
+class="math inline">\(\tfrac{dP_1}{dQ_1} \big|_{x} &gt; 0\)</span> and
+in that case <span class="math inline">\(\tfrac{dP^{x}}{dQ^{x}}\big|_{y}
+\tfrac{dP_1}{dQ_1}\big|_{x} = \tfrac{dP}{dQ}\big|_{(x,y)}\)</span>.</p>
+<p>Let <span class="math inline">\(\Gamma = \{ \tfrac{dP_1}{dQ_1} &gt; 0
+\}\)</span>. Note that <span class="math inline">\(P(\Gamma \times
+\mathcal{E}_2) = 1\)</span> by i. Finally,</p>
 <p><span class="math display">\[\begin{aligned}
-  D_{KL}(P \parallel Q) &amp;= \int_{\Gamma \times \mathcal{E}_2} \log(\tfrac{dP}{dQ}) \, dP \\
-            &amp;= \int_{\Gamma \times E_2} \log(\tfrac{dP_1}{dQ_1} \big|_{x}) \, P(d (x, y)) \, +  \\
-            &amp;\phantom{=} \int_{\Gamma \times E_2} \log (\tfrac{dP^{x}}{dQ^{x}}\big|_{y}) \, P(d (x, y)) \\
-            &amp;= \int \log(\tfrac{dP_1}{dQ_1}) \, d P_1 \, +  \\ 
-            &amp;\phantom{=} \int_{\Gamma} \int_{\mathcal{E}_2} \log(\tfrac{dP^x}{dQ^x}\big|_{y}) \, P^x(dy) P_1(dx) \\
+  D_{KL}(P \parallel Q) &amp;= \int_{\Gamma \times \mathcal{E}_2}
+\log(\tfrac{dP}{dQ}) \, dP \\
+            &amp;= \int_{\Gamma \times E_2} \log(\tfrac{dP_1}{dQ_1}
+\big|_{x}) \, P(d (x, y)) \, +  \\
+            &amp;\phantom{=} \int_{\Gamma \times E_2} \log
+(\tfrac{dP^{x}}{dQ^{x}}\big|_{y}) \, P(d (x, y)) \\
+            &amp;= \int \log(\tfrac{dP_1}{dQ_1}) \, d P_1 \, +  \\
+            &amp;\phantom{=} \int_{\Gamma} \int_{\mathcal{E}_2}
+\log(\tfrac{dP^x}{dQ^x}\big|_{y}) \, P^x(dy) P_1(dx) \\
             &amp;= D_{KL}(P_1 \parallel Q_1) \, + \\
-            &amp;\phantom{=} \int D_{KL}(P^{x} \parallel Q^{x}) \, P_1(dx),\end{aligned}\]</span> where the penultimate inequality follows from iii. and LOTUS. ◻</p>
+            &amp;\phantom{=} \int D_{KL}(P^{x} \parallel Q^{x}) \,
+P_1(dx),
+\end{aligned}\]</span> where the penultimate equality follows from iii.
+and LOTUS. ◻</p>
 </div>
+<p>The so-called chain rule has the following consequence for MLE:</p>
 <h2 id="further-reading">5. Further Reading</h2>
-<p>In the setting of standard Borel spaces, there are considerable results regarding the minimization of the KL divergence with respect to its first argument. Indeed, the space of Borel probability measures equipped with the topology of weak convergence is well-behaved and the sublevel sets of the KL divergence are compact. Together with lower semicontinuity, this implies that a minimizer of <span class="math inline">\(D_{KL}(\cdot \parallel Q)\)</span> exists when the first argument is restricted to a closed family <span class="math inline">\(\mathcal{P}\)</span> with at least one member <span class="math inline">\(P \in \mathcal{P}\)</span> such that <span class="math inline">\(D_{KL}(P \parallel Q) &lt; \infty\)</span>. When <span class="math inline">\(\mathcal{P}\)</span> is in addition convex and closed in the <a href="https://en.wikipedia.org/wiki/Total_variation_distance_of_probability_measures">total variation topology</a> (which is finer), there is a unique minimizer. This is explained in <span class="citation" data-cites="pinkski">[7]</span> and its references <span class="citation" data-cites="dupuis">[6]</span> and <span class="citation" data-cites="csiszar">[4]</span>.</p>
-<p>The notes <span class="citation" data-cites="boucheron">[3]</span> and the manuscript <span class="citation" data-cites="poly_wu">[8]</span> rigorously address the KL divergence in the context of information theory, adopting the variational viewpoint presented in §3. This viewpoint is also common in the large deviations literature; I found the standard reference <span class="citation" data-cites="dembo">[5]</span> particularly useful.</p>
-<p>Fundamental results on measure and probability theory found in the notes <span class="citation" data-cites="gaans_1 gaans_2">[9, 10]</span> and the book <span class="citation" data-cites="stoch">[1]</span> were referenced in this entry. The curious reader might find more interesting results there.</p>
-<p>Of course, the KL divergence has various interesting applications in ML. A starting point would be the classic reference <span class="citation" data-cites="bishop">[2]</span>. Some of those applications will be presented in a subsequent blog entry.</p>
+<p>In the setting of standard Borel spaces, there are considerable
+results regarding the minimization of the KL divergence with respect to
+its first argument. Indeed, the space of Borel probability measures
+equipped with the topology of weak convergence is well-behaved and the
+sublevel sets of the KL divergence are compact. Together with lower
+semicontinuity, this implies that a minimizer of <span
+class="math inline">\(D_{KL}(\cdot \parallel Q)\)</span> exists when the
+first argument is restricted to a closed family <span
+class="math inline">\(\mathcal{P}\)</span> with at least one member
+<span class="math inline">\(P \in \mathcal{P}\)</span> such that <span
+class="math inline">\(D_{KL}(P \parallel Q) &lt; \infty\)</span>. When
+<span class="math inline">\(\mathcal{P}\)</span> is in addition convex
+and closed in the <a
+href="https://en.wikipedia.org/wiki/Total_variation_distance_of_probability_measures">total
+variation topology</a> (which is finer), there is a unique minimizer.
+This is explained in <span class="citation"
+data-cites="pinkski">[7]</span> and its references <span
+class="citation" data-cites="dupuis">[6]</span> and <span
+class="citation" data-cites="csiszar">[4]</span>.</p>
+<p>The notes <span class="citation" data-cites="boucheron">[3]</span>
+and the manuscript <span class="citation"
+data-cites="poly_wu">[8]</span> rigorously address the KL divergence in
+the context of information theory, adopting the variational viewpoint
+presented in §3. This viewpoint is also common in the large deviations
+literature; I found the standard reference <span class="citation"
+data-cites="dembo">[5]</span> particularly useful.</p>
+<p>Fundamental results on measure and probability theory found in the
+notes <span class="citation" data-cites="gaans_1 gaans_2">[9, 10]</span>
+and the book <span class="citation" data-cites="stoch">[1]</span> were
+referenced in this entry. The curious reader might find more interesting
+results there.</p>
+<p>Of course, the KL divergence has various interesting applications in
+ML. A starting point would be the classic reference <span
+class="citation" data-cites="bishop">[2]</span>. Some of those
+applications will be presented in a subsequent blog entry.</p>
 <h2 class="unnumbered" id="references">References</h2>
-<div id="refs" class="references csl-bib-body" role="doc-bibliography">
-<div id="ref-stoch" class="csl-entry" role="doc-biblioentry">
-<div class="csl-left-margin">[1] </div><div class="csl-right-inline">Bertsekas, D.P. and Shreve, S.E. 1996. <em>Stochastic optimal control</em>. <a href="https://dspace.mit.edu/handle/1721.1/4852" class="uri">https://dspace.mit.edu/handle/1721.1/4852</a>; Athena Scientific.</div>
+<div id="refs" class="references csl-bib-body" data-entry-spacing="0"
+role="list">
+<div id="ref-stoch" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[1] </div><div
+class="csl-right-inline">Bertsekas, D.P. and Shreve, S.E. 1996.
+<em>Stochastic optimal control</em>. <a
+href="https://dspace.mit.edu/handle/1721.1/4852"
+class="uri">https://dspace.mit.edu/handle/1721.1/4852</a>; Athena
+Scientific.</div>
 </div>
-<div id="ref-bishop" class="csl-entry" role="doc-biblioentry">
-<div class="csl-left-margin">[2] </div><div class="csl-right-inline">Bishop, C.M. 2006. <em>Pattern recognition and machine learning</em>. Springer.</div>
+<div id="ref-bishop" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[2] </div><div
+class="csl-right-inline">Bishop, C.M. 2006. <em>Pattern recognition and
+machine learning</em>. Springer.</div>
 </div>
-<div id="ref-boucheron" class="csl-entry" role="doc-biblioentry">
-<div class="csl-left-margin">[3] </div><div class="csl-right-inline">Boucheron, S. et al. Concentration inequalities. <a href="https://www.hse.ru/data/2016/11/24/1113029206/Concentration%20inequalities.pdf" class="uri">https://www.hse.ru/data/2016/11/24/1113029206/Concentration%20inequalities.pdf</a>.</div>
+<div id="ref-boucheron" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[3] </div><div
+class="csl-right-inline">Boucheron, S. et al. Concentration
+inequalities. <a
+href="https://www.hse.ru/data/2016/11/24/1113029206/Concentration%20inequalities.pdf"
+class="uri">https://www.hse.ru/data/2016/11/24/1113029206/Concentration%20inequalities.pdf</a>.</div>
 </div>
-<div id="ref-csiszar" class="csl-entry" role="doc-biblioentry">
-<div class="csl-left-margin">[4] </div><div class="csl-right-inline">Csiszar, I. 1975. <span class="nocase"><span class="math inline">\(I\)</span>-Divergence Geometry of Probability Distributions and Minimization Problems</span>. <em>The Annals of Probability</em>. 3, 1 (1975), 146–158. DOI:https://doi.org/<a href="https://doi.org/10.1214/aop/1176996454">10.1214/aop/1176996454</a>.</div>
+<div id="ref-csiszar" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[4] </div><div
+class="csl-right-inline">Csiszar, I. 1975. <span class="nocase"><span
+class="math inline">\(I\)</span>-Divergence Geometry of Probability
+Distributions and Minimization Problems</span>. <em>The Annals of
+Probability</em>. 3, 1 (1975), 146–158. DOI:https://doi.org/<a
+href="https://doi.org/10.1214/aop/1176996454">10.1214/aop/1176996454</a>.</div>
 </div>
-<div id="ref-dembo" class="csl-entry" role="doc-biblioentry">
-<div class="csl-left-margin">[5] </div><div class="csl-right-inline">Dembo, A. and Zeitouni, O. 2009. <em>Large deviations techniques and applications</em>. Springer.</div>
+<div id="ref-dembo" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[5] </div><div
+class="csl-right-inline">Dembo, A. and Zeitouni, O. 2009. <em>Large
+deviations techniques and applications</em>. Springer.</div>
 </div>
-<div id="ref-dupuis" class="csl-entry" role="doc-biblioentry">
-<div class="csl-left-margin">[6] </div><div class="csl-right-inline">Dupuis, P. and Ellis, R.S. 1997. <em>A weak convergence approach to the theory of large deviations</em>. John Wiley &amp; Sons.</div>
+<div id="ref-dupuis" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[6] </div><div
+class="csl-right-inline">Dupuis, P. and Ellis, R.S. 1997. <em>A weak
+convergence approach to the theory of large deviations</em>. John Wiley
+&amp; Sons.</div>
 </div>
-<div id="ref-pinkski" class="csl-entry" role="doc-biblioentry">
-<div class="csl-left-margin">[7] </div><div class="csl-right-inline">Pinski, F.J. et al. 2015. Kullback–leibler approximation for probability measures on infinite dimensional spaces. <em>SIAM Journal on Mathematical Analysis</em>. 47, 6 (2015), 4091–4122. DOI:https://doi.org/<a href="https://doi.org/10.1137/140962802">10.1137/140962802</a>.</div>
+<div id="ref-pinkski" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[7] </div><div
+class="csl-right-inline">Pinski, F.J. et al. 2015. Kullback–leibler
+approximation for probability measures on infinite dimensional spaces.
+<em>SIAM Journal on Mathematical Analysis</em>. 47, 6 (2015), 4091–4122.
+DOI:https://doi.org/<a
+href="https://doi.org/10.1137/140962802">10.1137/140962802</a>.</div>
 </div>
-<div id="ref-poly_wu" class="csl-entry" role="doc-biblioentry">
-<div class="csl-left-margin">[8] </div><div class="csl-right-inline">Polyanskiy, Y. and Wu, Y. 2022. <em>Information theory: From coding to learning</em>. <a href="https://people.lids.mit.edu/yp/homepage/data/itbook-export.pdf" class="uri">https://people.lids.mit.edu/yp/homepage/data/itbook-export.pdf</a>; Cambridge University Press.</div>
+<div id="ref-poly_wu" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[8] </div><div
+class="csl-right-inline">Polyanskiy, Y. and Wu, Y. 2022. <em>Information
+theory: From coding to learning</em>. <a
+href="https://people.lids.mit.edu/yp/homepage/data/itbook-export.pdf"
+class="uri">https://people.lids.mit.edu/yp/homepage/data/itbook-export.pdf</a>;
+Cambridge University Press.</div>
 </div>
-<div id="ref-gaans_2" class="csl-entry" role="doc-biblioentry">
-<div class="csl-left-margin">[9] </div><div class="csl-right-inline">van Gaans, O. Gradient flows in measure spaces. <a href="https://www.math.leidenuniv.nl/%7Evangaans/TA2011-gradient-mei11.pdf" class="uri">https://www.math.leidenuniv.nl/%7Evangaans/TA2011-gradient-mei11.pdf</a>.</div>
+<div id="ref-gaans_2" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[9] </div><div class="csl-right-inline">van
+Gaans, O. Gradient flows in measure spaces. <a
+href="https://www.math.leidenuniv.nl/%7Evangaans/TA2011-gradient-mei11.pdf"
+class="uri">https://www.math.leidenuniv.nl/%7Evangaans/TA2011-gradient-mei11.pdf</a>.</div>
 </div>
-<div id="ref-gaans_1" class="csl-entry" role="doc-biblioentry">
-<div class="csl-left-margin">[10] </div><div class="csl-right-inline">van Gaans, O. Probability measures on metric spaces. <a href="https://www.mat.unb.br/cioletti/itmg-02-2012/pdfs/Probability%20measures%20on%20metric%20spaces%20-%20Onno%20van%20Gaans.pdf" class="uri">https://www.mat.unb.br/cioletti/itmg-02-2012/pdfs/Probability%20measures%20on%20metric%20spaces%20-%20Onno%20van%20Gaans.pdf</a>.</div>
+<div id="ref-gaans_1" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[10] </div><div
+class="csl-right-inline">van Gaans, O. Probability measures on metric
+spaces. <a
+href="https://www.mat.unb.br/cioletti/itmg-02-2012/pdfs/Probability%20measures%20on%20metric%20spaces%20-%20Onno%20van%20Gaans.pdf"
+class="uri">https://www.mat.unb.br/cioletti/itmg-02-2012/pdfs/Probability%20measures%20on%20metric%20spaces%20-%20Onno%20van%20Gaans.pdf</a>.</div>
 </div>
 </div>
-<section class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
 <hr />
 <ol>
-<li id="fn1" role="doc-endnote"><p>This is a stronger statement than the foregoing, because now the set of <span class="math inline">\(x\)</span>’s on which eq. 7 holds does not depend on <span class="math inline">\(A_2\)</span>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>This is because power is complementary to the
+probability of a <a
+href="https://en.wikipedia.org/wiki/Type_I_and_type_II_errors">type II
+error</a>; namely the probability that we falsely choose <span
+class="math inline">\(Q\)</span> when in fact <span
+class="math inline">\(R = P\)</span>.<a href="#fnref1"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>This is a stronger statement than the foregoing, because
+now the set of <span class="math inline">\(x\)</span>’s on which eq. 7
+holds does not depend on <span class="math inline">\(A_2\)</span>.<a
+href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>
 <footer>
