@@ -358,39 +358,21 @@ Reading</a></li>
 <li><a href="#references" id="toc-references">References</a></li>
 </ul>
 </nav>
-<p>This entry records some basic mathematical definitions and results
-revolving around the <em>Kullback-Leibler divergence</em> (KL divergence
-for short), or the <em>Boltzmann-Shannon relative entropy</em> as it is
-sometimes known. This notion makes important appearances in many
-subdisciplines of probability and statistics, such as estimation,
-information theory, large deviations, game theory, and machine learning
-(ML), to only name those of which I am aware. A blog entry on a concept
-with such far-flung applications can only ever be cursory, trammelled as
-it is by the acceptable length it can take and, naturally, my limited
-ken.</p>
-<p>I had initially planned to only cover some applications of the KL
-divergence to ML. However, I found myself frustrated by the confusion I
-sometimes saw in online discussions, and even academic papers, on what
-pertinent mathematical statements hold exactly, and how to go about
-proving them in satisfactory generality. I therefore decided to write a
-dedicated entry to rigorously work out the results I need to know as a
-practitioner of ML. A future entry will delve into said applications.
-Though this kind of piecemeal approach is not in keeping with the nature
-of this blog, here I thought it better to make an exception.</p>
-<p>The entry is written for a reader familiar with measure theory and
-measure-theoretic probability, knowing standard results such as the
-monotone convergence theorem (MCT), the dominated convergence theorem
-(DCT), the law of the unconscious statistician (LOTUS) and notions such
-as absolute continuity between measures (symbol <span
-class="math inline">\(\ll\)</span>) and the Radon-Nykodym (R-N)
-derivative. As is standard practice, I confound entities equal almost
-surely (a.s.) under an appropriate background probability measure. I
-furthermore do not care to distinguish between countable and uncountable
-probability spaces, writing sums here and integrals there as some
-authors do, preferring to only write integrals. It is worth stressing
-once more that my exposition is by no means exhaustive and is purely
-meant as a mathematically-solid springboard for applications of the KL
-divergence to ML.</p>
+<p>This post covers the mathematical foundations of the Kullback-Leibler
+divergence (also called relative entropy). KL divergence appears
+throughout probability and statistics—estimation, information theory,
+large deviations, game theory, machine learning. Any single post can
+only scratch the surface.</p>
+<p>I originally meant to write about KL divergence in ML directly, but
+kept running into confused discussions online (and occasionally in
+papers) about what the key results actually say and how to prove them
+properly. So this post works out the core theory carefully; applications
+to ML will come in a follow-up.</p>
+<p><strong>Prerequisites</strong>: Measure-theoretic probability, MCT,
+DCT, LOTUS, absolute continuity (<span
+class="math inline">\(\ll\)</span>), Radon-Nikodym derivatives. I write
+everything as integrals rather than splitting into sums for the discrete
+case, and I identify objects that are equal a.s.</p>
 <h2 id="definition-and-first-observations">1. Definition and First
 Observations</h2>
 <p>First we give the definition of the KL divergence.</p>
@@ -665,19 +647,16 @@ measurable space, then <span class="math display">\[D_{KL}(P \parallel
 Q) \geq D_{KL}(P \circ \phi^{-1} \parallel  Q \circ \phi^{-1}).\]</span>
 In particular, if <span class="math inline">\(\phi\)</span> is an
 isomorphism of measurable spaces, then equality holds.</em></p></li>
-<li><p>*<span class="math inline">\(D_{KL}(\cdot \parallel
+<li><p><em><span class="math inline">\(D_{KL}(\cdot \parallel
 \cdot)\)</span> is convex in its arguments in the sense that if <span
 class="math inline">\(P&#39;\)</span> and <span
 class="math inline">\(R\)</span> are two other probability measures,
-then $$</p>
-<span class="math display">\[\begin{gathered}
-        D_{KL}(\lambda P + (1 - \lambda) P&#39; \parallel \lambda Q + (1
-- \lambda) R) \leq \\ \lambda D_{KL}(P \parallel Q) + (1 -
+then <span class="math display">\[\begin{gathered}
+    D_{KL}(\lambda P + (1 - \lambda) P&#39; \parallel \lambda Q + (1 -
+\lambda) R) \leq \\ \lambda D_{KL}(P \parallel Q) + (1 -
 \lambda)D_{KL}(P&#39; \parallel R)
-
-\end{gathered}\]</span>
-<p>$$ for any <span class="math inline">\(\lambda \in [0,
-1]\)</span>.*</p></li>
+\end{gathered}\]</span> for any <span class="math inline">\(\lambda \in
+[0, 1]\)</span>.</em></p></li>
 </ul>
 </div>
 <p>When the space <span class="math inline">\(\mathcal{X}\)</span> is <a
